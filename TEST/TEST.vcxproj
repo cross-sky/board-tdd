@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{A18E0D66-9012-4FE3-A78C-19E6C59E8A7E}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>TEST</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;__CC_ARM;STM32F10X_MD;USE_STDPERIPH_DRIVER;__dsb_vs;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../UnityProject/inc;../UnityComm;./inc;../keilProject/CMSIS;../keilProject/FWlib/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MinimalRebuild>false</MinimalRebuild>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>../$(Configuration)/UnityProject.lib;odbc32.lib;odbccp32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <LinkStatus>
+      </LinkStatus>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UnityProject\UnityProject.vcxproj">
+      <Project>{a9efd90d-ab0a-45be-80eb-4dac3fdea26b}</Project>
+      <Private>true</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\UnityComm\unity.c" />
+    <ClCompile Include="..\UnityComm\unity_fixture.c" />
+    <ClCompile Include="tests\testBSP\Stm32_ub_spy.c" />
+    <ClCompile Include="tests\testBSP\TestStm32_ub_adc.c" />
+    <ClCompile Include="tests\testBSP\TestStm32_ub_cd4051.c" />
+    <ClCompile Include="tests\testBSP\TestStm32_ub_dmaUart.c" />
+    <ClCompile Include="tests\testUser\TestINputProcess_data.c" />
+    <ClCompile Include="tests\testUser\TestInputProcess_err.c" />
+    <ClCompile Include="tests\testUser\TestIoDetectErr.c" />
+    <ClCompile Include="tests\testUser\TestQueueProcess.c" />
+    <ClCompile Include="tests\testUser\TestRTdataStruct.c" />
+    <ClCompile Include="tests\testUser\TestValve_calc.c" />
+    <ClCompile Include="tests\test_runners\all_tests.c" />
+    <ClCompile Include="tests\test_runners\BspRunners\TestINputProcess_dataRunner.c" />
+    <ClCompile Include="tests\test_runners\BspRunners\TestQueueProcess_runner.c" />
+    <ClCompile Include="tests\test_runners\BspRunners\TestStm32_ub_adc_runners.c" />
+    <ClCompile Include="tests\test_runners\BspRunners\TestStm32_ub_cd4051_runners.c" />
+    <ClCompile Include="tests\test_runners\BspRunners\TestStm32_ub_dmaUart_runner.c" />
+    <ClCompile Include="tests\test_runners\UserRunners\TestInputProcess_errRunner.c" />
+    <ClCompile Include="tests\test_runners\UserRunners\TestIoDetectErr_runners.c" />
+    <ClCompile Include="tests\test_runners\UserRunners\TestRTdataStruct_runners.c" />
+    <ClCompile Include="tests\test_runners\UserRunners\TestValveCalc_runners.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\UnityComm\unity.h" />
+    <ClInclude Include="..\UnityComm\unity_fixture.h" />
+    <ClInclude Include="..\UnityComm\unity_fixture_internals.h" />
+    <ClInclude Include="..\UnityComm\unity_fixture_malloc_overrides.h" />
+    <ClInclude Include="..\UnityComm\unity_internals.h" />
+    <ClInclude Include="inc\Stm32_ub_adc_spy.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
