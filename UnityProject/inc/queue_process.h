@@ -61,7 +61,7 @@ typedef struct{
 	int16_t setCurrentProtectMax;	//电流保护基准
 	int16_t setPhaseProtect;		//相位保护
 	//。。。。..
-	uint16_t adcDectectState;	//adc错误状态
+	uint16_t errState;	//err错误状态
 	uint16_t cd4051DectState;	//cd4051错误状态
 
 	int16_t waterIn;
@@ -83,18 +83,18 @@ typedef struct{
 	CoreParams_t coreParems;
 }CoreProcess_t;
 
-//void vQueSetCoreParams(Command2RequestDataStruct* srcData);
-
 void vQueSetCoreParams(Command2RequestDataStruct *srcData);
 
 void vInpSetCoreParamADC(ptrInputProcessStruct srcData);
 
 uint8_t xQUESigPush(uint8_t sig);
 uint8_t vqueGetMachineState(void);
-void vQUEInit(void);
 void vTask3QUEProcess(void);
 uint8_t vQueCheck3MinDelay(void);
 void vInpSetCoreParamCd4051(uint16_t srcData);
+
+void vQueSetCoreParamErrstate(uint16_t errType);
+
 void vQUEGetTemperParams(Command3ReturnDataStruct *dstData);
 
 int16_t iQUE_getInTemper(void);
@@ -103,21 +103,10 @@ int16_t iQUE_getSuperheat(void);
 
 CoreProcess_t* xQue_getCoreData(void);
 
-
-/*
-
-uint8_t xQUESigPush(uint8_t sig);
-void vQUESetADCDectState(uint16_t adcstate);
-void vQUESetCD4051DectState(uint16_t cd4state);
-
-void vInpSetCoreParamADC(int16_t *realNtc);
-
 void vTask3QUEProcess(void);
 void vQUEInit(void);
-
-void vQUEDefrostInTemper(void);
-
-
+/*
+void vQUESetADCDectState(uint16_t adcstate);
 */
 #endif
 

@@ -3,7 +3,6 @@
 #include "StateType.h"
 
 #define ADC_NeedRunCount	5
-#define ADC_MaxNUmbers		8
 
 typedef enum{
 	ADC01_ENVT,		//»·ÎÂ¶È
@@ -23,10 +22,11 @@ typedef enum{
 
 void vADCSimpling(void);
 ptrState BspAdc_getPtrStateAdc(void);
-void vADCDmaChannel1_ISR(void);
 void vADCsetSingleInputFlag(uint16_t flag);
 void vADCInit(void);
 
+void vADCDmaChannel1_ISR(void);
+void vADCInit(void);
 
 #endif
 

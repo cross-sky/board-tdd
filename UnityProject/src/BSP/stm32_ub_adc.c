@@ -3,7 +3,7 @@
 #define ADC1_DR_Address    ((uint32_t)0x4001244C)
 #define ADCx_DMA1_IRQn     DMA1_Channel1_IRQn
 
-uint8_t tabChannel[ADCMAX]={0};
+
 /*
  *	ADC状态
  */
@@ -18,19 +18,20 @@ ptrState BspAdc_getPtrStateAdc(void)
 
 static uint16_t adcSingleInputCompleteFlag=STATE_DATA_DONE;
 
+#define  NTCPINCs GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3
+#define  NTCPINAs GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_4|GPIO_Pin_5
 //1.头文件设置adc 2.adc数组初始化 3.adc规则组设置 4.转换成实际数据
 const IOControl adcInput[]={
-	{ADC01_ENVT	, GPIO_Pin_0, GPIOC,RCC_APB2Periph_GPIOC},  //channel10
-	{ADC02_WTANK, GPIO_Pin_1, GPIOC,RCC_APB2Periph_GPIOC},	//channel11
-	{ADC03_AIN	, GPIO_Pin_2, GPIOC,RCC_APB2Periph_GPIOC},	//channel12
-	{ADC04_AMI	, GPIO_Pin_3, GPIOA,RCC_APB2Periph_GPIOC},	//channel4
-	{ADC05_AOUT	, GPIO_Pin_2, GPIOA,RCC_APB2Periph_GPIOA},	//channel6
-	{ADC06_WIN	, GPIO_Pin_3, GPIOA,RCC_APB2Periph_GPIOA},	//channel7
-	{ADC07_WOUT	, GPIO_Pin_4, GPIOA,RCC_APB2Periph_GPIOA},	//channel5
-	{ADC8_INTER	, GPIO_Pin_5, GPIOC,RCC_APB2Periph_GPIOA},	//channel13
-	{ADC09_current, GPIO_Pin_6, GPIOA,RCC_APB2Periph_GPIOA},	//channel2
+	{0, NTCPINCs, GPIOC,RCC_APB2Periph_GPIOC},  //pincs
+	{1, NTCPINAs, GPIOA,RCC_APB2Periph_GPIOA},	//pinas
 };
 
+//channel 序号以adc01-09所使用的引脚为准
+uint8_t tabChannel[ADCMAX]={
+	ADC_Channel_10,ADC_Channel_11,ADC_Channel_12,ADC_Channel_13,
+	ADC_Channel_0, ADC_Channel_1, ADC_Channel_4, ADC_Channel_16,
+	ADC_Channel_5
+};
  
 //************************************
 // Method:    checkSigleInputFlag
@@ -111,13 +112,13 @@ void vADCInit(void)
 	NVIC_Init(&NVIC_InitStructure);
 
 	//手动开CLK吧，也就2个,注意开ADC的时钟树
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC|RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOA|RCC_APB2Periph_ADC1
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC|RCC_APB2Periph_GPIOA|RCC_APB2Periph_ADC1
 		, ENABLE);
 	RCC_ADCCLKConfig(RCC_PCLK2_Div4);//<14MHz
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1,ENABLE);
 
-	//这里应该-1，初始化管脚不包括内部温度引脚
-	for (name=0; name<ADCMAX-1; name++)
+	//按定义的adcINput定义的数量为准(一般adc使用GPIOA和GPIOC)
+	for (name=0; name<2; name++)
 	{
 		GPIO_InitStructure.GPIO_Pin = adcInput[name].pin;
 		//这里设置为ADC输入是
@@ -154,16 +155,13 @@ void vADCInit(void)
 	ADC_Init(ADC1, &ADC_InitStructure);
 
 	//cdmax-1 个外部adc，1个内部adc
-	for(name=0;name<ADC8_INTER; name++)
+	for(name=0;name<ADCMAX; name++)
 	{
 		//  /* ADC1 regular channel14 configuration */ 
 		//ADC_RegularChannelConfig(ADC1, ADC_Channel_14, 1, ADC_SampleTime_55Cycles5);
 		//1. rank start at 1
 		ADC_RegularChannelConfig(ADC1, tabChannel[name], name+1, ADC_SampleTime_239Cycles5);
 	}
-
-	//1.Internal temp start
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_16, ADC8_INTER+1, ADC_SampleTime_239Cycles5);
 
 	//need to enable
 	ADC_TempSensorVrefintCmd(ENABLE);

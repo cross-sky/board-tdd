@@ -9,22 +9,13 @@ void vUartDmaTxHandler_ISR(void)
 {
 	vUart_setTxStateOn();
 }
-void DMA_ClearITPendingBit(uint32_t DMAy_IT)
+
+void adcStartSimpling(void)
 {
 
 }
 
-void DMA_Cmd(DMA_Channel_TypeDef* DMAy_Channelx, FunctionalState NewState)
-{
-
-}
-
-void RCC_APB2PeriphClockCmd(uint32_t RCC_APB2Periph, FunctionalState NewState)
-{
-
-}
-
-void GPIO_Init(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef* GPIO_InitStruct)
+void GpioPort_output(GPIO_TypeDef* gpioPort, uint16_t pins, uint16_t dataOut)
 {
 
 }
@@ -33,3 +24,14 @@ uint16_t CD4051_IOread(void)
 {
 	return 0x01;
 }
+
+void vuartDmaTxDataEnable(uint16_t len, uint8_t *address)
+{
+
+}
+
+void vUart2DmaTxHandler_ISR(void)
+{
+	vUart2_setTxStateOn();
+}
+

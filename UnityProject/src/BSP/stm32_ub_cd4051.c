@@ -1,17 +1,22 @@
 #include "cominc.h"
 
-#define  ControlCd4051Pins GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4
+#define  ControlCd4051Pins GPIO_Pin_6|GPIO_Pin_7|GPIO_Pin_8
 
 const IOControl controlCd4051[]={
-	{CDabc, ControlCd4051Pins, GPIOE,RCC_APB2Periph_GPIOE},
+	{CDabc, ControlCd4051Pins, GPIOB,RCC_APB2Periph_GPIOB}
 };
 
 const IOControl comminCd4051[]={
-	{CDcom1, GPIO_Pin_5, GPIOE,RCC_APB2Periph_GPIOE},
+	{CDcom1, GPIO_Pin_9, GPIOB,RCC_APB2Periph_GPIOB}
 };
 
 StateStruct stateCd4051={
 	STATE_ON,0,CDinMax*ADC_NeedRunCount,100,STATE_DATA_DONE
+};
+
+const uint16_t tabCDabc[8]={
+		0,	1>>6,2>>6,3>>6,
+		4>>6,5>>6,6>>6,7>>6
 };
 
 ptrState BspAdc_getPtrStateCd4051(void)
@@ -33,6 +38,9 @@ void CD4051_startSimple(ptrState s)
 	data = Inp_getDataCd4051(runTimes);
 	data |= CD4051_IOread()<<cdInX;
 	Inp_setDataCd4051(data, runTimes);
+
+	//IO out
+	GpioPort_output(controlCd4051[CDabc].port,ControlCd4051Pins,tabCDabc[cdInX]);
 }
 
 void vCd4051Simpling(void)
@@ -58,14 +66,14 @@ void vCd4051Init(void)
 	uint8_t name;
 
 	//手动开CLK吧，也就几个
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 	for (name=0; name<CDcomMax; name++)
 	{
 		//如上手动开了，就1个
 		//RCC_APB2PeriphClockCmd(controlCd4051[name].clk, ENABLE);
 		GPIO_InitStructure.GPIO_Pin = comminCd4051[name].pin;
 		//这里设置为浮空
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 		GPIO_Init(comminCd4051[name].port, &GPIO_InitStructure);
 	}
 
@@ -79,10 +87,8 @@ void vCd4051Init(void)
 		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 		GPIO_Init(controlCd4051[name].port, &GPIO_InitStructure);
 		//初始时要先设置cd4051打开cdin01对应的in口
-		//CDabc set 0
-		//IOL(&controlCd4051[name]);
 	}
-	//.............
+	//CDabc set 0
 	GpioPort_output(controlCd4051[CDabc].port,ControlCd4051Pins, 0);
 }
 

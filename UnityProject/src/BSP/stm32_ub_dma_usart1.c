@@ -11,7 +11,7 @@
 	}
 };
 
-uint8_t stateUart = STATE_ON;
+static uint8_t stateUart = STATE_ON;
 
 uint8_t TxBuff[TXBUF_SIZE]={0xfe,0xef};
 
@@ -28,9 +28,9 @@ void vUart_setTxStateOn(void)
 
 void vuartDmaTxDataEnable(uint16_t len, uint8_t *address)
 {
-	//DMA1_Ch_Usart1_Tx->CNDTR =len;	//
-	//DMA1_Ch_Usart1_Tx->CMAR =(uint32_t)&TxBuff;
-	//DMA_Cmd(DMA1_Ch_Usart1_Tx,ENABLE);
+	DMA1_Ch_Usart1_Tx->CNDTR =len;	//
+	DMA1_Ch_Usart1_Tx->CMAR =(uint32_t)&TxBuff;
+	DMA_Cmd(DMA1_Ch_Usart1_Tx,ENABLE);
 }
 
 void vUartDataReturn(uint8_t funcode)
@@ -139,17 +139,15 @@ void vUartDmaTxHandler_ISR(void)
 }
 
 
-/*
 void UART1_Init(void)
 {
 	GPIO_InitTypeDef	GPIO_InitStructure;
 	DMA_InitTypeDef		DMA_InitStructure;
 	NVIC_InitTypeDef	NVIC_InitStructure;
 	USART_InitTypeDef	USART_InitStructure;
-	
+
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO|USART1_Tx_GPIO_CLK,ENABLE);
 	RCC_APB2PeriphClockCmd(USART1_Tx_CLK,ENABLE);
-	//RCC_APB2PeriphClockCmd(USART1_Rx_CLK|USART1_Rx_GPIO,ENABLE);	
 	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1,ENABLE);
 
 	// Configure USART_Rx as input floating 
@@ -157,7 +155,7 @@ void UART1_Init(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(USART1_Rx_GPIO,&GPIO_InitStructure);
 
-	 // Configure USART_Tx as alternate function push-pull 
+	// Configure USART_Tx as alternate function push-pull 
 	GPIO_InitStructure.GPIO_Pin = USART1_TxPin;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
@@ -184,7 +182,7 @@ void UART1_Init(void)
 
 	DMA_DeInit(DMA1_Ch_Usart1_Rx);
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)USART1_Rx_DR_Base;
-	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)puartGetRTxAddress();
+	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)puartGetRTxAddress(&uartRxProcess);
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
 	DMA_InitStructure.DMA_BufferSize = RXBUF_SIZE;
 	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
@@ -201,7 +199,7 @@ void UART1_Init(void)
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 
-	  //Enable DMA Channel4 Interrupt 
+	//Enable DMA Channel4 Interrupt 
 	NVIC_InitStructure.NVIC_IRQChannel = DMA1_Ch_Usart1_Tx_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 5;
@@ -231,7 +229,7 @@ void UART1_Init(void)
 
 void Usart1IdlHandle_ISR(void)
 {
-	uint8_t DataLen;
+	uint16_t DataLen;
 	if (USART_GetITStatus(USART1, USART_IT_IDLE) != RESET)
 	{
 		DMA_Cmd(DMA1_Ch_Usart1_Rx, DISABLE);
@@ -239,11 +237,11 @@ void Usart1IdlHandle_ISR(void)
 		//
 		if (DataLen >0)
 		{
-			vuartRxPush(DataLen);
+			RT_uartRxPush((uint8_t)DataLen, &uartRxProcess);
 		}
 		DMA_ClearFlag(DMA1_FLAG_GL5|DMA1_FLAG_TC5|DMA1_FLAG_TE5|DMA1_FLAG_HT5);//清标志
 		DMA1_Ch_Usart1_Rx->CNDTR =RXBUF_SIZE;	//
-		DMA1_Ch_Usart1_Rx->CMAR =(uint32_t)puartGetRTxAddress();
+		DMA1_Ch_Usart1_Rx->CMAR =(uint32_t)puartGetRTxAddress(&uartRxProcess);
 		DMA_Cmd(DMA1_Ch_Usart1_Rx, ENABLE);//处理完,重开DMA
 		//读SR后读DR清除Idle
 		DataLen = USART1->SR;
@@ -262,15 +260,8 @@ void vUartDmaRxHandle_ISR(void)
 	DMA_ClearITPendingBit(DMA1_IT_TC5|DMA1_IT_TE5);
 	DMA_Cmd(DMA1_Ch_Usart1_Rx, DISABLE);//关闭DMA,防止处理其间有数据, rx
 	DMA1_Ch_Usart1_Rx->CNDTR =RXBUF_SIZE;	//
-	DMA1_Ch_Usart1_Rx->CMAR =(uint32_t)puartGetRTxAddress();
+	DMA1_Ch_Usart1_Rx->CMAR =(uint32_t)puartGetRTxAddress(&uartRxProcess);
 	DMA_Cmd(DMA1_Ch_Usart1_Rx, ENABLE);
 }
 
-void vUartDmaTxHandler_ISR(void)
-{
-	DMA_ClearITPendingBit(DMA1_IT_TC4|DMA1_IT_TE4);
-	DMA_Cmd(DMA1_Ch_Usart1_Tx, DISABLE);
-	uartEvent.state = STATE_ON;
-}
 
-*/

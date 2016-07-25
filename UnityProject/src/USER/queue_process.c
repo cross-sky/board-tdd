@@ -198,6 +198,11 @@ void vInpSetCoreParamCd4051(uint16_t srcData)
 	coreProcess.coreParems.cd4051DectState = srcData;
 }
 
+void vQueSetCoreParamErrstate(uint16_t errType)
+{
+	coreProcess.coreParems.errState = errType;
+}
+
 //错误事件发生时转入， 
 uint8_t vqueFunErr(void)
 {
@@ -581,7 +586,7 @@ void vqueNormalEventProcess(void)
 		case SIG_NOERR:
 			{
 				//前一个函数置为要运行的函数
-				vqueSetNewFuntion(vqueFunOn);
+				//vqueSetNewFuntion(vqueFunOn);
 				break;
 			}
 		case SIG_OFF:
@@ -747,6 +752,10 @@ void vQUEGetTemperParams(Command3ReturnDataStruct *dstData)
 	dstData->machineA.inTemper = coreProcess.coreParems.machineA.inTemper;
 	dstData->machineA.outTemper = coreProcess.coreParems.machineA.outTemper;
 	dstData->machineA.evaporateTemper = coreProcess.coreParems.machineA.evaporateTemper;
+
+	dstData->runState.machineState = coreProcess.runState.machineState;
+	dstData->runState.elecState = coreProcess.runState.elecState;
+	dstData->errType = coreProcess.coreParems.errState;
 	//进 出 环 水箱 吸 排 蒸 电流互感 adc错误 cd4051错误 内部温度  (高位在前)
 	
 }

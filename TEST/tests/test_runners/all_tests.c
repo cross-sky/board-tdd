@@ -12,6 +12,7 @@ static void RunAllTests(void)
   RUN_TEST_GROUP(RTdataStruct);
   RUN_TEST_GROUP(Uart1Dma);
   RUN_TEST_GROUP(ValveCalc);
+  RUN_TEST_GROUP(Uart2Dma);
 }
 
 int main(int argc, const char * argv[])

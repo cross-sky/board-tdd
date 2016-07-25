@@ -41,22 +41,14 @@ void vCd4051Simpling(void);
 void CD4051_startSimple(ptrState s);
 void GpioPort_output(GPIO_TypeDef* gpioPort, uint16_t pins, uint16_t dataOut);
 
+void vCd4051Init(void);
+
+
 /*
-
-#define CORE_CDIN CDin03//核心检测，检测到0表示断开
-
-#define CD4051_NUMBER_CONTROL	0x03
-#define CD4051_MASK_INPUTS		(0x07)
-#define CD4051_BANKS			0x02
-
-extern const CDabcRW rwCdabc[CD4051_BANKS][8];
-
 #define IOH(ioControl_) (((*ioControl_).port)->BSRR=(*ioControl_).pin)
 //#define IOH(ioControl_) ((((IOControl*)ioControl_)->port)->BSRR=((IOControl*)ioControl_)->pin)
 #define IOL(ioControl_) (((*ioControl_).port)->BRR=(*ioControl_).pin)
 
-void vCd4051Init(void);
-void vCd4051Detect(void);
 */
 
 #endif

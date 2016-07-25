@@ -24,35 +24,16 @@
 #define DMA1_Ch_Usart1_Rx_IRQn	DMA1_Channel5_IRQn
 
 void vUartDmaTxHandler_ISR(void);
+void UART1_Init(void);
+void Usart1IdlHandle_ISR(void);
+void vUartDmaRxHandle_ISR(void);
+
 void vUart_setTxStateOn(void);
 uint8_t* vUart_getTxBuff(void);
 
 void vUartRxPopProcess(ptrUartNodesProcess nodes);
+void vuartDmaTxDataEnable(uint16_t len, uint8_t *address);
 
-/*
-
-
-
-
-
-
-
-typedef enum{
-	FrameStart1Bit=0x00,
-	FrameStart2Bit,
-	FrameDataLenBit,
-	FrameFunCodeBit
-}RTxEnum;
-
-
-
-void vUartRxPopProcess(void);
-void UART1_Init(void);
-void Usart1IdlHandle_ISR(void);
-void vUartDmaRxHandle_ISR(void);
-void vUartDmaTxHandler_ISR(void);
-
-*/
 
 #endif
 

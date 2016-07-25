@@ -70,3 +70,12 @@ TEST(RTdataStruct, TestFrameEndAtCommand3)
 	TEST_ASSERT_EQUAL(STATE_ON, RT_checkFrameEnd(ptrNode));
 }
 
+
+TEST(RTdataStruct, TestCommand4)
+{
+	uint8_t buff[300];
+	uint16_t len;
+	len = RT_command4SendReturn(buff);
+	printf("len is %d \r\n", len);
+	printf("%s",buff);
+}

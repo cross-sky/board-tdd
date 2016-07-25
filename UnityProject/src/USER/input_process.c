@@ -241,7 +241,7 @@ void Inp_cd4051DataProcess(void)
 	vInpSetCoreParamCd4051(dataInput.finaCD4051);
 }
 
-uint32_t* uINPGetADCaddress(StateStruct* ptrState)
+uint16_t* uINPGetADCaddress(StateStruct* ptrState)
 {
 	//dataInput.countNtc++;
 	//t=data[i++]; 是先取data[i]的值再i++
@@ -249,18 +249,24 @@ uint32_t* uINPGetADCaddress(StateStruct* ptrState)
 	return &(dataInput.dataNtc[ptrState->runCount][0]);
 }
 
-/*
-
-
 
 void Task1RegularSimpling(void)
 {
-	vCd4051Detect();
 	vADCSimpling();
+	vCd4051Simpling();
 }
 
 void Task2InputProcess(void)
 {
+	Inp_adcDataProcess();
+	Inp_cd4051DataProcess();
+}
+
+/*
+
+
+
+
 	err=0;
 	vINPCd4051Process();
 	vINPAdcProcess();

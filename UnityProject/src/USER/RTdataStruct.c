@@ -137,6 +137,35 @@ void RT_command3ReceiveRequest(void)
 	//do nothinf;
 }
 
+uint8_t RT_command4ReceiveRequest(Command4RequestDataStruct *ptrc4)
+{
+	return ptrc4->outKind;
+}
+
+uint16_t RT_command4SendReturn(uint8_t *txAddr)
+{
+	static uint16_t i=1;
+	uint16_t j=0;
+	Command3ReturnDataStruct returnData;
+	
+	vQUEGetTemperParams(&returnData);
+
+	j=sprintf_s(txAddr,300, "i %d,",i);
+	j += sprintf_s(txAddr+j,300-j, " WaterIn %d,",returnData.waterIn);
+	j += sprintf_s(txAddr+j,300-j, " waterOut %d,",returnData.waterOut);
+	j += sprintf_s(txAddr+j,300-j, " waterBank %d,",returnData.waterBank);
+	j += sprintf_s(txAddr+j,300-j, " evironT %d,",returnData.evironT);
+	j += sprintf_s(txAddr+j,300-j, " innerTemper %d,",returnData.innerTemper);
+	j += sprintf_s(txAddr+j,300-j, " valvesteps %d,",returnData.valvesteps);
+	j += sprintf_s(txAddr+j,300-j, " airevaT %d,",returnData.machineA.evaporateTemper);
+	j += sprintf_s(txAddr+j,300-j, " airinT %d,",returnData.machineA.inTemper);
+	j += sprintf_s(txAddr+j,300-j, " air %d,",returnData.machineA.outTemper);
+	j += sprintf_s(txAddr+j,300-j, " state %d\r\n",returnData.machineA.state);//..........
+
+	i++;
+	return j;
+}
+
 
 void RT_command1CreateRequest(Command1RequestDataStruct *ptrc1)
 {
@@ -182,3 +211,17 @@ void RT_command3CreateRequest(Command3RequestDataStruct *ptrc3)
 	adddata = RT_dataAdd(len,buf);
 	buf[len] = adddata;
 }
+
+void RT_command4CreateRequest(Command4RequestDataStruct *ptrc4)
+{
+	uint8_t adddata=0;
+	uint8_t *buf = (uint8_t *)ptrc4;
+	uint8_t len=sizeof(Command4RequestDataStruct);
+
+	ptrc4->dataFrame.length = len;
+	ptrc4->dataFrame.command = FunCode4;
+	ptrc4->outKind = 1;
+	adddata = RT_dataAdd(len,buf);
+	buf[len] = adddata;
+}
+

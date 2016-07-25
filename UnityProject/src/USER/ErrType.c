@@ -4,7 +4,7 @@ static ErrStruct err={0,0,0};
 
 uint16_t ERR_usedFlag(void)
 {
-	return err.errUsed;
+	return (uint16_t)err.errUsed;
 }
 
 void ERR_setErr(uint16_t ErrType, uint16_t id)

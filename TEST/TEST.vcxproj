@@ -51,14 +51,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;__CC_ARM;STM32F10X_MD;USE_STDPERIPH_DRIVER;__dsb_vs;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../UnityProject/inc;../UnityComm;./inc;../keilProject/CMSIS;../keilProject/FWlib/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MinimalRebuild>false</MinimalRebuild>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <AdditionalIncludeDirectories>../UnityProject/inc;../UnityComm;./inc;../keilProject/CMSIS;../keilProject/FWlib/inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>../$(Configuration)/UnityProject.lib;odbc32.lib;odbccp32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../$(Configuration)/UnityProject.lib;../stm32fwlib.lib;odbc32.lib;odbccp32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
       <LinkStatus>
       </LinkStatus>
@@ -97,6 +97,7 @@
     <ClCompile Include="..\UnityComm\unity.c" />
     <ClCompile Include="..\UnityComm\unity_fixture.c" />
     <ClCompile Include="tests\testBSP\Stm32_ub_spy.c" />
+    <ClCompile Include="tests\testBSP\TestStm32_dma_uart2.c" />
     <ClCompile Include="tests\testBSP\TestStm32_ub_adc.c" />
     <ClCompile Include="tests\testBSP\TestStm32_ub_cd4051.c" />
     <ClCompile Include="tests\testBSP\TestStm32_ub_dmaUart.c" />
@@ -109,6 +110,7 @@
     <ClCompile Include="tests\test_runners\all_tests.c" />
     <ClCompile Include="tests\test_runners\BspRunners\TestINputProcess_dataRunner.c" />
     <ClCompile Include="tests\test_runners\BspRunners\TestQueueProcess_runner.c" />
+    <ClCompile Include="tests\test_runners\BspRunners\TestStm32_dam_uart2.c" />
     <ClCompile Include="tests\test_runners\BspRunners\TestStm32_ub_adc_runners.c" />
     <ClCompile Include="tests\test_runners\BspRunners\TestStm32_ub_cd4051_runners.c" />
     <ClCompile Include="tests\test_runners\BspRunners\TestStm32_ub_dmaUart_runner.c" />

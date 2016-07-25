@@ -19,6 +19,7 @@ void __dsb(uint8_t);
 #include "stm32f10x_conf.h"
 #include "stm32f10x.h"
 
+#include "stm32_ub_led.h"
 #include "StateType.h"
 #include "stm32_ub_adc.h"
 #include "ErrType.h"
@@ -30,6 +31,7 @@ void __dsb(uint8_t);
 
 #include "stm32_ub_relay.h"
 #include "stm32_ub_dma_usart1.h"
+#include "stm32_dma_uart2.h"
 #include "valve_calc.h"
 
 #include "queue_process.h"
