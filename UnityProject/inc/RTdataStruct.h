@@ -17,6 +17,8 @@ typedef struct{
 	int16_t outTemper;			//排气温度
 	int16_t evaporateTemper;	//蒸发温度
 	int16_t current;			//电流
+	int16_t valveMainStep;		//主电子膨胀发开度
+	int16_t valveSubStep;		//辅助电子膨胀阀开度
 }Machine_t;
 
 typedef struct DataFrameStruct 
@@ -99,8 +101,9 @@ typedef struct Command3ReturnDataStruct{
 	int16_t waterBank;
 	int16_t evironT;
 	int16_t innerTemper;
-	uint16_t valvesteps;
+
 	uint16_t errType;
+	uint16_t cd4051DectState;	//cd4051状态
 
 	RunState_t runState;
 	Machine_t machineA;
@@ -119,6 +122,10 @@ uint8_t RT_checkFrameEnd(ptrRTdataNode ptrNode);
 
 uint8_t RT_dataAdd(uint8_t len, uint8_t *addr);
 
+uint8_t RT_getNodesCount(ptrUartNodesProcess nodes);
+void RT_addOutIndex(ptrUartNodesProcess nodes);
+
+
 void RT_command1Receiverequest(Command1RequestDataStruct *ptrC1);
 void RT_command2ReceiveRequest(Command2RequestDataStruct *ptrC2);
 uint8_t RT_command4ReceiveRequest(Command4RequestDataStruct *ptrc4);
@@ -132,7 +139,7 @@ void RT_command4CreateRequest(Command4RequestDataStruct *ptrc4);
 
 uint8_t RT_command12SendReturn(uint8_t funcode,uint8_t *txAddr);
 uint8_t RT_command3SendReturn(uint8_t funcode,uint8_t *txAddr);
-uint16_t RT_command4SendReturn(uint8_t *txAddr);
+uint16_t RT_command4SendReturn(int8_t *txAddr);
 
 
 #endif

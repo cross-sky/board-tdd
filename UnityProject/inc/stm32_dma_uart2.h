@@ -33,12 +33,17 @@ void vUart2TxFun0(void);
 void vUart2TxFun1(void);
 void vUart2RxPopProcess(ptrUartNodesProcess nodes);
 void vUart2_setTxStateOn(void);
+
+void UART2_Init(void);
 void TaskUart2TxStrData(void);
 
 TabUart2TxFun* Uart2_getTxFunTab(void);
 UartProcess_t* Uart2_getRxTab(void);
 
+void vUart2DmaRxHandle_ISR(void);
 void vUart2DmaTxHandler_ISR(void);
+void Usart2IdlHandle_ISR(void);
+
 
 #endif
 

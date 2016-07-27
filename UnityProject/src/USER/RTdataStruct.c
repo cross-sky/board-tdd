@@ -1,5 +1,7 @@
 #include "cominc.h"
 
+#include<stdio.h>
+
 uint8_t* puartGetRTxAddress(ptrUartNodesProcess nodes)
 {
 	return &(nodes->node[nodes->in].buff[RTX_START_BIT]);
@@ -20,13 +22,27 @@ uint8_t RT_uartRxPush(uint8_t len,ptrUartNodesProcess nodes)
 	return STATE_ON;
 }
 
+uint8_t RT_getNodesCount(ptrUartNodesProcess nodes)
+{
+	return ((nodes->max - nodes->in) + (nodes->out));
+}
+
+void RT_addOutIndex(ptrUartNodesProcess nodes)
+{
+	nodes->out++;
+	if (nodes->out>=nodes->max)
+	{
+		nodes->out=0;
+	}
+}
+
 
 //check frame start 
 uint8_t RT_checkFrameStart(ptrRTdataNode ptrNode)
 {
 	uint8_t i,len=ptrNode->length;
 	uint8_t *buf=&(ptrNode->buff[0]);
-	for (i=0; i<(len>>2); i++)
+	for (i=0; i<((len>>1) + 1); i++)
 	{
 		if (*(buf)==FrameStart1Code && *(buf+1)==FrameStart2Code)
 		{
@@ -142,7 +158,7 @@ uint8_t RT_command4ReceiveRequest(Command4RequestDataStruct *ptrc4)
 	return ptrc4->outKind;
 }
 
-uint16_t RT_command4SendReturn(uint8_t *txAddr)
+uint16_t RT_command4SendReturn(int8_t *txAddr)
 {
 	static uint16_t i=1;
 	uint16_t j=0;
@@ -150,17 +166,24 @@ uint16_t RT_command4SendReturn(uint8_t *txAddr)
 	
 	vQUEGetTemperParams(&returnData);
 
-	j=sprintf_s(txAddr,300, "i %d,",i);
-	j += sprintf_s(txAddr+j,300-j, " WaterIn %d,",returnData.waterIn);
-	j += sprintf_s(txAddr+j,300-j, " waterOut %d,",returnData.waterOut);
-	j += sprintf_s(txAddr+j,300-j, " waterBank %d,",returnData.waterBank);
-	j += sprintf_s(txAddr+j,300-j, " evironT %d,",returnData.evironT);
-	j += sprintf_s(txAddr+j,300-j, " innerTemper %d,",returnData.innerTemper);
-	j += sprintf_s(txAddr+j,300-j, " valvesteps %d,",returnData.valvesteps);
-	j += sprintf_s(txAddr+j,300-j, " airevaT %d,",returnData.machineA.evaporateTemper);
-	j += sprintf_s(txAddr+j,300-j, " airinT %d,",returnData.machineA.inTemper);
-	j += sprintf_s(txAddr+j,300-j, " air %d,",returnData.machineA.outTemper);
-	j += sprintf_s(txAddr+j,300-j, " state %d\r\n",returnData.machineA.state);//..........
+	j=sprintf((char *)txAddr, "i %d,",i);
+	j += sprintf((char *)(txAddr+j), " WIn %d,",returnData.waterIn);
+	j += sprintf((char *)(txAddr+j), " wOut %d,",returnData.waterOut);
+	j += sprintf((char *)(txAddr+j), " wBank %d,",returnData.waterBank);
+	j += sprintf((char *)(txAddr+j), " eviT %d,",returnData.evironT);
+	j += sprintf((char *)(txAddr+j), " innerT %d,",returnData.innerTemper);
+
+	j += sprintf((char *)(txAddr+j), " airevaT %d,",returnData.machineA.evaporateTemper);
+	j += sprintf((char *)(txAddr+j), " airinT %d,",returnData.machineA.inTemper);
+	j += sprintf((char *)(txAddr+j), " airOutT %d,",returnData.machineA.outTemper);
+
+	j += sprintf((char *)(txAddr+j), " errType %d,",returnData.errType);
+	j += sprintf((char *)(txAddr+j), " cdIostate %d,",returnData.cd4051DectState);
+
+	j += sprintf((char *)(txAddr+j), " mstate %d",returnData.machineA.state);//..........
+	j += sprintf((char *)(txAddr+j), " valMAstep %d,",returnData.machineA.valveMainStep);
+	j += sprintf((char *)(txAddr+j), " valSBstep %d\r\n",returnData.machineA.valveSubStep);
+
 
 	i++;
 	return j;

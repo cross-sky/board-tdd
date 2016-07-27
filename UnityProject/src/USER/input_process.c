@@ -8,6 +8,16 @@ InputProcessStruct dataInput={
 	0
 };
 
+void vInp_init(void)
+{
+	uint8_t i;
+	for(i=0;i<ADCMAX;i++)
+	{
+		dataInput.usedNtc[i] = ADC_USED;
+	}
+	dataInput.usedNtc[ADC07_WOUT] = ADC_UNUSED;
+}
+
 uint16_t Inp_getFinalCd4051(void)
 {
 	return dataInput.finaCD4051;
@@ -35,7 +45,8 @@ ptrInputProcessStruct INP_getDataInput(void)
 
 uint8_t isIdInRange(uint8_t id)
 {
-	return id>=0 && id<ADCMAX;
+	//id>=0 && 无符号整形和 0 的无意义比较
+	return (id<ADCMAX);
 }
 
 uint8_t isNtcUsed(uint8_t id)
@@ -260,24 +271,6 @@ void Task2InputProcess(void)
 {
 	Inp_adcDataProcess();
 	Inp_cd4051DataProcess();
+	vInpSetErrState();
 }
 
-/*
-
-
-
-
-	err=0;
-	vINPCd4051Process();
-	vINPAdcProcess();
-	vUartRxPopProcess();
-
-	//if (err==1)
-	//{
-	//	xQUESigPush(SIG_ERR);
-	//}
-	//else
-	//	xQUESigPush(SIG_NOERR);
-}
-
-*/

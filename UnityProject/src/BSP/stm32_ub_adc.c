@@ -8,7 +8,7 @@
  *	ADC״̬
  */
 StateStruct stateADC={
-	STATE_ON,0,ADC_NeedRunCount,100,STATE_DATA_DONE
+	STATE_ON,0,ADC_NeedRunCount,200,STATE_DATA_DONE
 };
 
 ptrState BspAdc_getPtrStateAdc(void)

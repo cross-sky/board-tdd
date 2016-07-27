@@ -34,6 +34,7 @@ uint8_t* vUart_getTxBuff(void);
 void vUartRxPopProcess(ptrUartNodesProcess nodes);
 void vuartDmaTxDataEnable(uint16_t len, uint8_t *address);
 
+void TaskUart1PopProcess(void);
 
 #endif
 

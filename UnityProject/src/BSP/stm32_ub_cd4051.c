@@ -11,12 +11,12 @@ const IOControl comminCd4051[]={
 };
 
 StateStruct stateCd4051={
-	STATE_ON,0,CDinMax*ADC_NeedRunCount,100,STATE_DATA_DONE
+	STATE_ON,0,CDinMax*ADC_NeedRunCount,200,STATE_DATA_DONE
 };
 
 const uint16_t tabCDabc[8]={
-		0,	1>>6,2>>6,3>>6,
-		4>>6,5>>6,6>>6,7>>6
+		0,	1<<6,2<<6,3<<6,
+		4<<6,5<<6,6<<6,7<<6
 };
 
 ptrState BspAdc_getPtrStateCd4051(void)
@@ -26,7 +26,9 @@ ptrState BspAdc_getPtrStateCd4051(void)
 
 uint16_t CD4051_IOread(void)
 {
-	return 0x01;
+	//return (GPIOB->IDR & GPIO_Pin_9);
+	return GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_9);
+	//return 0x01;
 }
 
 void CD4051_startSimple(ptrState s)
@@ -38,13 +40,11 @@ void CD4051_startSimple(ptrState s)
 	data = Inp_getDataCd4051(runTimes);
 	data |= CD4051_IOread()<<cdInX;
 	Inp_setDataCd4051(data, runTimes);
-
-	//IO out
-	GpioPort_output(controlCd4051[CDabc].port,ControlCd4051Pins,tabCDabc[cdInX]);
 }
 
 void vCd4051Simpling(void)
 {
+	uint8_t cdIndex;
 	StateStruct *s=&stateCd4051;
 	if (State_getDataProcessedFlag(s) == STATE_DATA_UNDONE)
 	{
@@ -57,7 +57,11 @@ void vCd4051Simpling(void)
 	}
 
 	CD4051_startSimple(s);
+		//IO out
 	State_addRunCount(s);
+
+	cdIndex = State_getRunCount(s)&0x07;
+	GpioPort_output(controlCd4051[CDabc].port,ControlCd4051Pins,tabCDabc[cdIndex]);
 }
 
 void vCd4051Init(void)

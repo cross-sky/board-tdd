@@ -2,7 +2,7 @@
 
 StateType State_getState(ptrState s)
 {
-	return s->state;
+	return (StateType)s->state;
 }
 
 uint16_t State_getRunCount(ptrState s)
@@ -63,3 +63,4 @@ void State_addRunCount(ptrState s)
 		s->dataProcessFlag = STATE_DATA_UNDONE;
 	}
 }
+

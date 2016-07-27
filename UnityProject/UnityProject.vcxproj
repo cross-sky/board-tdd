@@ -50,7 +50,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;__CC_ARM;STM32F10X_MD;USE_STDPERIPH_DRIVER;__dsb_vs;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;__CC_ARM;STM32F10X_MD;USE_STDPERIPH_DRIVER;__dsb_vs;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>./inc;../keilProject/FWlib/inc;../keilProject/CMSIS;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MinimalRebuild>false</MinimalRebuild>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
@@ -84,6 +84,7 @@
     <ClCompile Include="src\BSP\stm32_ub_dma_usart1.c" />
     <ClCompile Include="src\BSP\stm32_ub_led.c" />
     <ClCompile Include="src\BSP\stm32_ub_relay.c" />
+    <ClCompile Include="src\BSP\Tsystick.c" />
     <ClCompile Include="src\USER\adc_filter.c" />
     <ClCompile Include="src\USER\ErrType.c" />
     <ClCompile Include="src\USER\input_process.c" />
@@ -91,6 +92,8 @@
     <ClCompile Include="src\USER\queue_process.c" />
     <ClCompile Include="src\USER\RTdataStruct.c" />
     <ClCompile Include="src\USER\StateType.c" />
+    <ClCompile Include="src\USER\stm32f10x_it.c" />
+    <ClCompile Include="src\USER\task.c" />
     <ClCompile Include="src\USER\valve_calc.c" />
   </ItemGroup>
   <ItemGroup>

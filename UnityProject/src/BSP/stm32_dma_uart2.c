@@ -44,6 +44,7 @@ void vUart2_setTxStateOn(void)
 
 void vuart2DmaTxDataEnable(uint16_t len, uint8_t *address)
 {
+	DMA_Cmd(DMA1_Ch_Usart2_Tx,DISABLE);
 	DMA1_Ch_Usart2_Tx->CNDTR =len;	//
 	DMA1_Ch_Usart2_Tx->CMAR =(uint32_t)&TxBuff;
 	DMA_Cmd(DMA1_Ch_Usart2_Tx,ENABLE);
@@ -54,6 +55,15 @@ void vUart2DmaTxHandler_ISR(void)
 	DMA_ClearITPendingBit(DMA1_IT_TC7|DMA1_IT_TE7);
 	DMA_Cmd(DMA1_Ch_Usart2_Tx, DISABLE);
 	vUart2_setTxStateOn();
+}
+
+void vUart2DmaRxHandle_ISR(void)
+{
+	DMA_ClearITPendingBit(DMA1_IT_TC6|DMA1_IT_TE6);
+	DMA_Cmd(DMA1_Ch_Usart2_Rx, DISABLE);//关闭DMA,防止处理其间有数据, rx
+	DMA1_Ch_Usart2_Rx->CNDTR =RXBUF_SIZE;	//
+	DMA1_Ch_Usart2_Rx->CMAR =(uint32_t)puartGetRTxAddress(&uart2RxProcess);
+	DMA_Cmd(DMA1_Ch_Usart2_Rx, ENABLE);
 }
 
 void UART2_Init(void)
@@ -173,14 +183,7 @@ void Usart2IdlHandle_ISR(void)
 	USART_ClearITPendingBit(USART2, USART_IT_IDLE);
 }
 
-void vUart2DmaRxHandle_ISR(void)
-{
-	DMA_ClearITPendingBit(DMA1_IT_TC6|DMA1_IT_TE6);
-	DMA_Cmd(DMA1_Ch_Usart2_Rx, DISABLE);//关闭DMA,防止处理其间有数据, rx
-	DMA1_Ch_Usart2_Rx->CNDTR =RXBUF_SIZE;	//
-	DMA1_Ch_Usart2_Rx->CMAR =(uint32_t)puartGetRTxAddress(&uart2RxProcess);
-	DMA_Cmd(DMA1_Ch_Usart2_Rx, ENABLE);
-}
+
 
 uint8_t vuartRxMessage(uint8_t *buf)
 {
@@ -217,34 +220,43 @@ void vUart2RxPopProcess(ptrUartNodesProcess nodes)
 		//1.check frame start code
 		if (RT_checkFrameStart(&dataNode) == STATE_OFF)
 		{
+			RT_addOutIndex(nodes);
 			return;
 		}
 		//2. check add 
 		if (RT_checkFrameEnd(&dataNode) == STATE_OFF)
 		{
+			RT_addOutIndex(nodes);
 			return;
 		}
 		uart2TxFun.indesFun = vuartRxMessage(dataNode.buff);
 
-		nodes->out++;
-		if (nodes->out>=nodes->max)
-		{
-			nodes->out=0;
-		}
+		RT_addOutIndex(nodes);
 	}
 }
 
 void vUart2TxFun1(void)
 {
-	RT_command4SendReturn(TxBuff);
+	uint16_t len;
+	len =  RT_command4SendReturn((int8_t *)TxBuff);
+	vuart2DmaTxDataEnable(len,TxBuff);
 }
 void vUart2TxFun0(void)
 {
 
 }
 
-//1s/excute times
+//2s/excute times 5*10*40
 void TaskUart2TxStrData(void)
 {
-	uart2TxFun.fun[uart2TxFun.indesFun]();
+	static uint8_t i=0;
+
+	if (i>=40)
+	{
+		i=0;
+		uart2TxFun.fun[uart2TxFun.indesFun]();
+	}
+	i++;
+	vUart2RxPopProcess(&uart2RxProcess);
 }
+

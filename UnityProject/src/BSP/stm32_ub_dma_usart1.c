@@ -114,29 +114,22 @@ void vUartRxPopProcess(ptrUartNodesProcess nodes)
 		//1.check frame start code
 		if (RT_checkFrameStart(&dataNode) == STATE_OFF)
 		{
+			RT_addOutIndex(nodes);
 			return;
 		}
 		//2. check add 
 		if (RT_checkFrameEnd(&dataNode) == STATE_OFF)
 		{
+			RT_addOutIndex(nodes);
 			return;
 		}
 		vuartRxMessageAndReturnOk(dataNode.buff);
 
-		nodes->out++;
-		if (nodes->out>=nodes->max)
-		{
-			nodes->out=0;
-		}
+		RT_addOutIndex(nodes);
 	}
 }
 
-void vUartDmaTxHandler_ISR(void)
-{
-	DMA_ClearITPendingBit(DMA1_IT_TC4|DMA1_IT_TE4);
-	DMA_Cmd(DMA1_Ch_Usart1_Tx, DISABLE);
-	vUart_setTxStateOn();
-}
+
 
 
 void UART1_Init(void)
@@ -255,6 +248,13 @@ void Usart1IdlHandle_ISR(void)
 	USART_ClearITPendingBit(USART1, USART_IT_IDLE);
 }
 
+void vUartDmaTxHandler_ISR(void)
+{
+	DMA_ClearITPendingBit(DMA1_IT_TC4|DMA1_IT_TE4);
+	DMA_Cmd(DMA1_Ch_Usart1_Tx, DISABLE);
+	vUart_setTxStateOn();
+}
+
 void vUartDmaRxHandle_ISR(void)
 {
 	DMA_ClearITPendingBit(DMA1_IT_TC5|DMA1_IT_TE5);
@@ -264,4 +264,8 @@ void vUartDmaRxHandle_ISR(void)
 	DMA_Cmd(DMA1_Ch_Usart1_Rx, ENABLE);
 }
 
+void TaskUart1PopProcess(void)
+{
+	vUartRxPopProcess(&uartRxProcess);
+}
 

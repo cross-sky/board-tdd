@@ -63,6 +63,15 @@
     <ClCompile Include="src\BSP\stm32_dma_uart2.c">
       <Filter>源文件\BSP</Filter>
     </ClCompile>
+    <ClCompile Include="src\BSP\Tsystick.c">
+      <Filter>源文件\USER</Filter>
+    </ClCompile>
+    <ClCompile Include="src\USER\task.c">
+      <Filter>源文件\USER</Filter>
+    </ClCompile>
+    <ClCompile Include="src\USER\stm32f10x_it.c">
+      <Filter>源文件\USER</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\ErrType.h">

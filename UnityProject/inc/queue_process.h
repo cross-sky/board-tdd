@@ -93,6 +93,8 @@ void vTask3QUEProcess(void);
 uint8_t vQueCheck3MinDelay(void);
 void vInpSetCoreParamCd4051(uint16_t srcData);
 
+void vInpSetErrState(void);
+
 void vQueSetCoreParamErrstate(uint16_t errType);
 
 void vQUEGetTemperParams(Command3ReturnDataStruct *dstData);

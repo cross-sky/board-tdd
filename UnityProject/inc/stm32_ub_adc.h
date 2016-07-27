@@ -17,7 +17,7 @@ typedef enum{
 	ADCMAX,			//×î´óÖµ
 	ADC_USED,
 	ADC_UNUSED
-};
+}ADCENUM;
 
 
 void vADCSimpling(void);
@@ -26,7 +26,6 @@ void vADCsetSingleInputFlag(uint16_t flag);
 void vADCInit(void);
 
 void vADCDmaChannel1_ISR(void);
-void vADCInit(void);
 
 #endif
 

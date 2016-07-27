@@ -21,6 +21,6 @@ uint16_t* uINPGetADCaddress(StateStruct* ptrState);
 
 void Task1RegularSimpling(void);
 void Task2InputProcess(void);
-
+void vInp_init(void);
 
 #endif

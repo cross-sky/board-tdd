@@ -25,7 +25,7 @@ typedef enum {
 typedef enum {
 	CDcom1=0x00,
 	CDcomMax
-}CDControl;
+}CDCom;
 
 typedef struct  IOControl
 {

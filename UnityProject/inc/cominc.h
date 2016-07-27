@@ -15,9 +15,15 @@
 void __dsb(uint8_t);
 #endif // __dsb_vs
 
+#include <string.h>
+#include<stdio.h>
 
 #include "stm32f10x_conf.h"
 #include "stm32f10x.h"
+#include "stm32f10x_it.h"
+
+#include "Tsystick.h"
+#include "task.h"
 
 #include "stm32_ub_led.h"
 #include "StateType.h"
@@ -38,27 +44,13 @@ void __dsb(uint8_t);
 /*
 #include <string.h>
 
-#include "stm32f10x_spi.h"
-#include "stm32f10x_it.h"
-#include<stdio.h>
+
 #include<stdlib.h>
-#include <string.h>
-#include "task.h"
+
 
 #include "stdint.h"
-#include "stm32_ub_led.h"
-#include "stm32_ub_cd4051.h"
-#include "stm32_ub_adc.h"
-#include "event.h"
-#include "stm32_ub_relay.h"
-#include "input_process.h"
-#include "queue_process.h"
-#include "stm32_ub_dma_usart1.h"
-#include "adc_filter.h"
 
-#include "stm32_ub_valve.h"
-#include "valve_calc.h"
-#include "Tsystick.h"
+
 */
 
 

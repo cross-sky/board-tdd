@@ -130,3 +130,4 @@ uint8_t IODECT_getFlagCheckWaterOpen(void)
 {
 	return waterCheckFlag;
 }
+

@@ -198,6 +198,13 @@ void vInpSetCoreParamCd4051(uint16_t srcData)
 	coreProcess.coreParems.cd4051DectState = srcData;
 }
 
+void vInpSetErrState(void)
+{
+	ErrStruct err;
+	ERR_getErr(&err);
+	coreProcess.coreParems.errState = err.errType;
+}
+
 void vQueSetCoreParamErrstate(uint16_t errType)
 {
 	coreProcess.coreParems.errState = errType;
@@ -563,7 +570,7 @@ void vqueNormalEventProcess(void)
 	if (tSig != SIG_NULL)
 	{
 		tmstate = vqueGetMachineState();
-		vqueSetMachineState(tSig);
+		vqueSetMachineState((SigState)tSig);
 
 		timeFlag=0;
 		switch(tSig)
@@ -623,7 +630,7 @@ void vqueNormalEventProcess(void)
 						//sig_null
 						coreProcess.funExcuted = FUN_EXCUTED;
 						coreProcess.funState=FUN_STATE_RUN;
-						vqueSetMachineState(tmstate);
+						vqueSetMachineState((SigState)tmstate);
 						break;
 					}
 				}
@@ -746,16 +753,20 @@ void vQUEGetTemperParams(Command3ReturnDataStruct *dstData)
 
 	dstData->evironT = coreProcess.coreParems.environT;
 	dstData->innerTemper = coreProcess.coreParems.innerTemper;
-	dstData->valvesteps = coreProcess.coreParems.valvesteps;
 
 
 	dstData->machineA.inTemper = coreProcess.coreParems.machineA.inTemper;
 	dstData->machineA.outTemper = coreProcess.coreParems.machineA.outTemper;
 	dstData->machineA.evaporateTemper = coreProcess.coreParems.machineA.evaporateTemper;
+	dstData->machineA.valveMainStep = coreProcess.coreParems.machineA.valveMainStep;
+	dstData->machineA.valveSubStep = coreProcess.coreParems.machineA.valveSubStep;
 
 	dstData->runState.machineState = coreProcess.runState.machineState;
+	
 	dstData->runState.elecState = coreProcess.runState.elecState;
 	dstData->errType = coreProcess.coreParems.errState;
+	dstData->cd4051DectState = coreProcess.coreParems.cd4051DectState;
+
 	//进 出 环 水箱 吸 排 蒸 电流互感 adc错误 cd4051错误 内部温度  (高位在前)
 	
 }
