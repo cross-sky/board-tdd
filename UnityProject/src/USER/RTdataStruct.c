@@ -168,7 +168,7 @@ uint16_t RT_command4SendReturn(int8_t *txAddr)
 
 	j=sprintf((char *)txAddr, "i %d,",i);
 	j += sprintf((char *)(txAddr+j), " WIn %d,",returnData.waterIn);
-	j += sprintf((char *)(txAddr+j), " wOut %d,",returnData.waterOut);
+//	j += sprintf((char *)(txAddr+j), " wOut %d,",returnData.waterOut);
 	j += sprintf((char *)(txAddr+j), " wBank %d,",returnData.waterBank);
 	j += sprintf((char *)(txAddr+j), " eviT %d,",returnData.evironT);
 	j += sprintf((char *)(txAddr+j), " innerT %d,",returnData.innerTemper);
@@ -178,7 +178,7 @@ uint16_t RT_command4SendReturn(int8_t *txAddr)
 	j += sprintf((char *)(txAddr+j), " airOutT %d,",returnData.machineA.outTemper);
 
 	j += sprintf((char *)(txAddr+j), " errType %d,",returnData.errType);
-	j += sprintf((char *)(txAddr+j), " cdIostate %d,",returnData.cd4051DectState);
+	j += sprintf((char *)(txAddr+j), " cdIostate %x,",returnData.cd4051DectState);
 
 	j += sprintf((char *)(txAddr+j), " mstate %d",returnData.machineA.state);//..........
 	j += sprintf((char *)(txAddr+j), " valMAstep %d,",returnData.machineA.valveMainStep);
@@ -189,6 +189,13 @@ uint16_t RT_command4SendReturn(int8_t *txAddr)
 	return j;
 }
 
+
+void RT_command5ReceiveRequest(Command5RequestDataStruct *ptrc5)
+{
+	vRelay_command5SetRealy(ptrc5->data1Relay);
+	ValveCalc_command5PushSig(ptrc5->data2ValveA, ValveMainA);
+	ValveCalc_command5PushSig(ptrc5->data3ValveB, ValveSubB);
+}
 
 void RT_command1CreateRequest(Command1RequestDataStruct *ptrc1)
 {
@@ -248,3 +255,18 @@ void RT_command4CreateRequest(Command4RequestDataStruct *ptrc4)
 	buf[len] = adddata;
 }
 
+void RT_command5CreateRequest(Command5RequestDataStruct *ptrc5, Command5RequestDataStruct *ptrc5Data)
+{
+	uint8_t adddata=0;
+	uint8_t *buf = (uint8_t *)ptrc5;
+	uint8_t len=sizeof(Command5RequestDataStruct);
+
+	ptrc5->dataFrame.length = len;
+	ptrc5->dataFrame.command = FunCode5;
+
+	ptrc5->data1Relay = ptrc5Data->data1Relay;
+	ptrc5->data2ValveA = ptrc5Data->data2ValveA;
+	ptrc5->data3ValveB = ptrc5Data->data3ValveB;
+	adddata = RT_dataAdd(len,buf);
+	buf[len] = adddata;
+}

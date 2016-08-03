@@ -4,7 +4,7 @@
 
 #define VALVE_STEPSInit	16	//默认每次运行最大步数
 
-ValveStatus_t testValveData[ValveKindsMax]={
+static ValveStatus_t testValveData[ValveKindsMax]={
 	{statusDone,0,0,VALVE_STEPSInit,DirectHold,0},
 	{statusDone,0,0,VALVE_STEPSInit,DirectHold,0}
 };
@@ -12,7 +12,7 @@ ValveProcess_t *valveSigs;
 ValveSig_t sig;
 CoreProcess_t *queData;
 
-void setInitTestValveData(uint16_t valveKind)
+static void setInitTestValveData(uint16_t valveKind)
 {
 	testValveData[valveKind].runStep = 0;
 	testValveData[valveKind].totalSteps = 0;
@@ -35,6 +35,8 @@ TEST_SETUP(ValveCalc)
 {
 	ValveCalv_changeValveData(testValveData);
 	 valveSigs = ValveCalc_getSigNodes();
+	 valveSigs->in = 0;
+	 valveSigs->out = 0;
 	 queData = xQue_getCoreData();
 }
 
@@ -102,10 +104,17 @@ TEST(ValveCalc, valveCalcCheckProcess)
 	ValveCalc_pushSig(&sig);
 	ValveCalc_checkProcess(ValveMainA);
 	
-	for(i=0;i<VALVE_MIN_STEP - 1;i++)
+	for(i=0;i<VALVE_MIN_STEP ;i++)
 	{
 		ValveCalc_valveRun(ValveMainA);
 	}
+
+	//额外10次保持励磁
+	for(i=0;i<=10 ;i++)
+	{
+		ValveCalc_valveRun(ValveMainA);
+	}
+
 	ValveCalc_checkProcess(ValveMainA);
 	TEST_ASSERT_EQUAL(statusDone,testValveData[ValveMainA].valveStatus);
 }

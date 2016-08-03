@@ -44,6 +44,7 @@ void ioDetectCheckErr(ptrIODectectErr ioErrAddress,uint16_t inXData)
 	{
 		//set an err
 		ERR_setErr(ioErrAddress->errDetectType, 0);
+		
 	}
 	else{
 		if (inXData == CDIN_OPEN)
@@ -68,6 +69,10 @@ void ioDetectCheckErr(ptrIODectectErr ioErrAddress,uint16_t inXData)
 				ioErrAddress->stopTimes++;
 				ioErrAddress->runCount = 0;
 				ioErrAddress->errCount = 0;
+
+				//2. need to send sig_off 
+
+
 			}
 			else
 			{
@@ -119,11 +124,11 @@ void IODECT_stopCheckWaterOpen(void)
 {
 	waterCheckFlag=STATE_OFF;
 	//IOERR_OFF,0,0,MAX_StopTimes,0
-	ioErrDectect[2].state = IOERR_OFF;
-	ioErrDectect[2].stopTimes =0;
-	ioErrDectect[2].runCount = 0;
-	ioErrDectect[2].MaxRunCount=MAX_StopTimes;
-	ioErrDectect[2].errCount = 0;
+	ioErrDectect[IOERR_WATER_OPEN].state = IOERR_OFF;
+	ioErrDectect[IOERR_WATER_OPEN].stopTimes =0;
+	ioErrDectect[IOERR_WATER_OPEN].runCount = 0;
+	ioErrDectect[IOERR_WATER_OPEN].MaxRunCount=MAX_StopTimes;
+	ioErrDectect[IOERR_WATER_OPEN].errCount = 0;
 }
 
 uint8_t IODECT_getFlagCheckWaterOpen(void)

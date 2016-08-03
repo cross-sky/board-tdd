@@ -45,6 +45,7 @@ typedef enum FUNCODE{
 	FunCode2,
 	FunCode3,
 	FunCode4,
+	FunCode5,
 	FunCodeMax
 }FUNCODE;
 
@@ -88,8 +89,7 @@ typedef struct Command2RequestDataStruct{
 //command2returnDataStruct is the same as Command1ReturnDataStruct;
 //just use the same struct
 
-//Command3RequestDataStruct 
-
+//return Command3ReturnDataStruct
 typedef struct Command3RequestDataStruct{
 	DataFrameStruct dataFrame;
 }Command3RequestDataStruct;
@@ -109,10 +109,19 @@ typedef struct Command3ReturnDataStruct{
 	Machine_t machineA;
 }Command3ReturnDataStruct;
 
+//not need to return ok
 typedef struct Command4RequestDataStruct{
 	DataFrameStruct dataFrame;
 	uint8_t outKind;	//输出类型选择，字节数(命令3返回类型)还是字符串(命令4返回类型)，仅用于串口2
 }Command4RequestDataStruct;
+
+//return Command12ReturnDataStruct
+typedef struct Command5RequestDataStruct{
+	DataFrameStruct dataFrame;
+	uint16_t data1Relay;	//指定继电器输出
+	int8_t data2ValveA;		//指定ValveA输出步数
+	int8_t data3ValveB;		//指定valveB输出步数
+}Command5RequestDataStruct;
 
 uint8_t* puartGetRTxAddress(ptrUartNodesProcess nodes);
 
@@ -129,18 +138,18 @@ void RT_addOutIndex(ptrUartNodesProcess nodes);
 void RT_command1Receiverequest(Command1RequestDataStruct *ptrC1);
 void RT_command2ReceiveRequest(Command2RequestDataStruct *ptrC2);
 uint8_t RT_command4ReceiveRequest(Command4RequestDataStruct *ptrc4);
-
+void RT_command5ReceiveRequest(Command5RequestDataStruct *ptrc5);
 
 void RT_command3CreateRequest(Command3RequestDataStruct *ptrc3);
 void RT_command2CreateRequest(Command2RequestDataStruct *ptrc2);
 void RT_command1CreateRequest(Command1RequestDataStruct *ptrc1);
 void RT_command4CreateRequest(Command4RequestDataStruct *ptrc4);
+void RT_command5CreateRequest(Command5RequestDataStruct *ptrc5, Command5RequestDataStruct *ptrc5Data);
 
 
 uint8_t RT_command12SendReturn(uint8_t funcode,uint8_t *txAddr);
 uint8_t RT_command3SendReturn(uint8_t funcode,uint8_t *txAddr);
 uint16_t RT_command4SendReturn(int8_t *txAddr);
-
 
 #endif
 

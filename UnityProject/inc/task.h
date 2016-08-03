@@ -37,6 +37,7 @@ typedef enum
 	TASK2_Uart1PopProcess,
 	TASK3_RegularSimpling,
 	TASK4_InputProcess,
+	TASK5_valveProcess,
 	TASKS_MAX
 } TASK_LIST;
 

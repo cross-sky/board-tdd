@@ -194,6 +194,12 @@ uint8_t vuartRxMessage(uint8_t *buf)
 	case FunCode4:
 		{
 			j=RT_command4ReceiveRequest((Command4RequestDataStruct *)buf);
+			uart2TxFun.indesFun =j;
+			break;
+		}
+	case FunCode5:
+		{
+			RT_command5ReceiveRequest((Command5RequestDataStruct *)buf);
 			break;
 		}
 	default:
@@ -229,7 +235,7 @@ void vUart2RxPopProcess(ptrUartNodesProcess nodes)
 			RT_addOutIndex(nodes);
 			return;
 		}
-		uart2TxFun.indesFun = vuartRxMessage(dataNode.buff);
+		vuartRxMessage(dataNode.buff);
 
 		RT_addOutIndex(nodes);
 	}

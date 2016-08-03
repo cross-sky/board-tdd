@@ -92,6 +92,10 @@ uint16_t Inp_adcGetErr(void)
 	{
 		//ntc由错误转为正常，发送一个事件(显示屏转到关机状态)...
 		ERR_clearErr();
+
+		//发送关机，转到关机状态，这时显示板更新到关机状态，
+		//再由显示板判断是否再次开机
+		xQUESigPush(SIG_OFF);
 	}
 
 	return ERR_UNUSED;
@@ -237,12 +241,12 @@ void Inp_cd4051DataProcess(void)
 	//3.均值处理
 	Inp_cd4051Method();
 	//4.查找错误
-	IOERR_checkErr(ERR_HIGH_PREESURE, Inp_getFinalCd4051Inx(CDin01_HIGH_PREESURE));
+	IOERR_checkErr(ERR_HIGH_PREESURE, Inp_getFinalCd4051Inx(CDin01_WATER_OPEN));
 	IOERR_checkErr(ERR_LOW_PREESURE, Inp_getFinalCd4051Inx(CDin02_LOW_PREESURE));
 
 	if (IODECT_getFlagCheckWaterOpen() == STATE_ON)
 	{
-		IOERR_checkErr(ERR_WATER_OPEN, Inp_getFinalCd4051Inx(CDin03_WATER_OPEN));
+		IOERR_checkErr(ERR_WATER_OPEN, Inp_getFinalCd4051Inx(CDin03_HIGH_PREESURE));
 	}
 	//err detect
 
@@ -273,4 +277,6 @@ void Task2InputProcess(void)
 	Inp_cd4051DataProcess();
 	vInpSetErrState();
 }
+
+
 

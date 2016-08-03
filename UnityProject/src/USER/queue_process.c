@@ -1,5 +1,9 @@
 #include "cominc.h"
 
+//.............
+//满足单次高低压，排气启动条件,在init阶段检测,还必须返回信息给显示板
+//.................
+
 QueueProcess_t queueProcess={
 	0,0
 };
@@ -113,6 +117,20 @@ int16_t iQUE_getEvaporateTemper(void)
 int16_t iQUE_getSuperheat(void)
 {
 	return 30;
+}
+
+void iQUE_ValveChanges(ValveKinds valveKind,uint16_t step)
+{
+	switch(valveKind)
+	{
+	case ValveMainA:
+		coreProcess.coreParems.machineA.valveMainStep = step;
+		break;
+	case ValveSubB:
+		coreProcess.coreParems.machineA.valveSubStep = step;
+	default:
+		break;
+	}
 }
 
 
@@ -253,8 +271,8 @@ uint8_t vqueFunOff(void)
 	case FUN_STATE_INIT:
 		{
 			//无动作 直接退出
-			vRelaySet(Relay10Motor, STATE_OFF);
-			vRelaySet(Relay03Pump, STATE_OFF);
+			vRelaySet(Relay09Motor, STATE_OFF);
+			vRelaySet(Relay03CyclePump, STATE_OFF);
 			vRelaySet(Relay02Valve4way, STATE_OFF);
 			vRelaySet(Relay01Compressor, STATE_OFF);
 
@@ -290,14 +308,14 @@ uint8_t vqueFunOn(void)
 			{
 			case Time3s:
 				{
-					vRelaySet(Relay03Pump, STATE_ON);
+					vRelaySet(Relay03CyclePump, STATE_ON);
 					IODECT_startCheckWaterOpen();
 					break;
 				}
 			case Time10s:
 				{
 					//2@@@@@@@@@@@检测水流闭合
-					vRelaySet(Relay10Motor, STATE_ON);
+					vRelaySet(Relay09Motor, STATE_ON);
 					if (vQueCheck3MinDelay() == STATE_ON)
 					{
 						timeFlag = Time180s-1;
@@ -352,8 +370,8 @@ uint8_t vqueFunOn(void)
 				}
 			case Time10s:
 				{
-					vRelaySet(Relay10Motor, STATE_OFF);
-					vRelaySet(Relay03Pump, STATE_OFF);
+					vRelaySet(Relay09Motor, STATE_OFF);
+					vRelaySet(Relay03CyclePump, STATE_OFF);
 					timeFlag=0;
 					return FUN_STATE_EXIT;
 				}
@@ -410,15 +428,15 @@ uint8_t vqueFunDefrost(void)
 			{
 			case Time3s:
 				{
-					//vRelaySet(Relay10Motor, STATE_ON);
-					vRelaySet(Relay03Pump, STATE_ON);
+					//vRelaySet(Relay09Motor, STATE_ON);
+					vRelaySet(Relay03CyclePump, STATE_ON);
 					IODECT_startCheckWaterOpen();
 					break;
 				}
 			case Time10s:
 				{
 					//2@@@@@@@@@@@检测水流闭合 待写.....
-					//vRelaySet(Relay10Motor, STATE_ON);
+					//vRelaySet(Relay09Motor, STATE_ON);
 					break;
 				}
 			case Time60s:
@@ -474,13 +492,13 @@ uint8_t vqueFunDefrost(void)
 			case Time3s:
 				{
 					vRelaySet(Relay01Compressor,STATE_OFF);
-					vRelaySet(Relay03Pump, STATE_OFF);
+					vRelaySet(Relay03CyclePump, STATE_OFF);
 					IODECT_stopCheckWaterOpen();
 					break;
 				}
 			case Time10s:
 				{
-					//vRelaySet(Relay10Motor, STATE_OFF);
+					//vRelaySet(Relay09Motor, STATE_OFF);
 					vRelaySet(Relay02Valve4way, STATE_OFF);
 					timeFlag=0;
 					return FUN_STATE_EXIT;

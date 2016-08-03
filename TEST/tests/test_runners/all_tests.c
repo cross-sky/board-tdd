@@ -13,6 +13,8 @@ static void RunAllTests(void)
   RUN_TEST_GROUP(Uart1Dma);
   RUN_TEST_GROUP(ValveCalc);
   RUN_TEST_GROUP(Uart2Dma);
+  RUN_TEST_GROUP(Relays);
+
 }
 
 int main(int argc, const char * argv[])

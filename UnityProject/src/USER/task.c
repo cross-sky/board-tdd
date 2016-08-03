@@ -9,7 +9,8 @@ TPC_TASK TaskComps[]=
 	{0, 0, 10,  10, TaskUart2TxStrData},	//task 50ms/每次，
 	{0, 0, 10,  10, TaskUart1PopProcess},	//50ms每次
 	{0, 0, 2,  2, Task1RegularSimpling},	//50ms每次
-	{0, 0, 20,  20, Task2InputProcess}	//50ms每次
+	{0, 0, 20,  20, Task2InputProcess},	//50ms每次
+	{0, 0, 6,  6, vTask_valveProcess}	//5ms每次
 };
 
 
@@ -29,9 +30,8 @@ void TaskInit(void)
 	vInp_init();
 
 	vCd4051Init();
+	vRelayInit();
 
-	//vrelayinit();
-	//vqueinit();
 
 	SystickInit();		//start at lsat
 }

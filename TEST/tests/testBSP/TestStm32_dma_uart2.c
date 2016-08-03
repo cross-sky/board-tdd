@@ -63,3 +63,4 @@ TEST(Uart2Dma, RxAnUnvalidCommandThenNotProcessed)
 	
 	TEST_ASSERT_EQUAL(NodeMax,RT_getNodesCount(&uartRxProcess));
 }
+

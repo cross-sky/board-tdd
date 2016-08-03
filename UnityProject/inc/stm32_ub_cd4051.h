@@ -4,14 +4,14 @@
 #define CDIN_OPEN 0
 
 typedef enum {
-	CDin01_HIGH_PREESURE=0x00,	//高压A  对应的异常
-	CDin02_LOW_PREESURE,			//低压A	对应的异常
-	CDin03_WATER_OPEN,			//水流
-	CDin04,			//高压B	对应的异常
-	CDin05,			//低压B	对应的异常
-	CDin06_HLEVEL,			//水泵
-	CDin07_MLEVEL,			//低水位
-	CDin08_LLEVEL,			//中水位
+	CDin01_WATER_OPEN=0x00,	//水流
+	CDin02_LOW_PREESURE,	//低压A	对应的异常
+	CDin03_HIGH_PREESURE,	//高压A  对应的异常
+	CDin04,			//拨码1
+	CDin05_LLEVEL,			//低水位
+	CDin06,			//拨码2
+	CDin07_MLEVEL,			//中水位
+	CDin08_HLEVEL,			//高水位
 	CDinMax,
 	CDin_EXTRAL_TEMPERATUR110,
 	CDunused

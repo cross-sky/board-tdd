@@ -107,6 +107,8 @@ CoreProcess_t* xQue_getCoreData(void);
 
 void vTask3QUEProcess(void);
 void vQUEInit(void);
+
+void iQUE_ValveChanges(ValveKinds valveKind,uint16_t step);
 /*
 void vQUESetADCDectState(uint16_t adcstate);
 */

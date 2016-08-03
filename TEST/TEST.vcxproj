@@ -96,6 +96,7 @@
   <ItemGroup>
     <ClCompile Include="..\UnityComm\unity.c" />
     <ClCompile Include="..\UnityComm\unity_fixture.c" />
+    <ClCompile Include="TestRelay.c" />
     <ClCompile Include="tests\testBSP\Stm32_ub_spy.c" />
     <ClCompile Include="tests\testBSP\TestStm32_dma_uart2.c" />
     <ClCompile Include="tests\testBSP\TestStm32_ub_adc.c" />
@@ -116,6 +117,7 @@
     <ClCompile Include="tests\test_runners\BspRunners\TestStm32_ub_dmaUart_runner.c" />
     <ClCompile Include="tests\test_runners\UserRunners\TestInputProcess_errRunner.c" />
     <ClCompile Include="tests\test_runners\UserRunners\TestIoDetectErr_runners.c" />
+    <ClCompile Include="tests\test_runners\UserRunners\TestRelay_runners.c" />
     <ClCompile Include="tests\test_runners\UserRunners\TestRTdataStruct_runners.c" />
     <ClCompile Include="tests\test_runners\UserRunners\TestValveCalc_runners.c" />
   </ItemGroup>

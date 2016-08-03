@@ -35,12 +35,14 @@ void __dsb(uint8_t);
 #include "IoDetectErr.h"
 #include "RTdataStruct.h"
 
-#include "stm32_ub_relay.h"
+
 #include "stm32_ub_dma_usart1.h"
 #include "stm32_dma_uart2.h"
 #include "valve_calc.h"
 
 #include "queue_process.h"
+
+#include "stm32_ub_relay.h"
 /*
 #include <string.h>
 
