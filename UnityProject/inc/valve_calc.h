@@ -63,4 +63,10 @@ void ValveCalc_command5PushSig(int8_t data, uint16_t valveKind);
 
 void vTask_valveProcess(void);
 void ValveCalc_setStartFlag(uint8_t state);
+
+
+void vTask_valveCalc(void);
+
+void ValveCalc_valveInit(void);
+void ValveCalc_valveClose(void);
 #endif

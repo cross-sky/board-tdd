@@ -38,6 +38,8 @@ typedef enum
 	TASK3_RegularSimpling,
 	TASK4_InputProcess,
 	TASK5_valveProcess,
+	TASK6_QUEProcess,
+	TASK7_valveCalc,
 	TASKS_MAX
 } TASK_LIST;
 

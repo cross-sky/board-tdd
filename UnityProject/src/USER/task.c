@@ -8,9 +8,11 @@ TPC_TASK TaskComps[]=
 	{0, 0, 201,  201, LED1on},			// 5*200=1s   ok	
 	{0, 0, 10,  10, TaskUart2TxStrData},	//task 50ms/每次，
 	{0, 0, 10,  10, TaskUart1PopProcess},	//50ms每次
-	{0, 0, 2,  2, Task1RegularSimpling},	//50ms每次
-	{0, 0, 20,  20, Task2InputProcess},	//50ms每次
-	{0, 0, 6,  6, vTask_valveProcess}	//5ms每次
+	{0, 0, 2,  2, Task1RegularSimpling},	//10ms每次
+	{0, 0, 20,  20, Task2InputProcess},	//100ms每次
+	{0, 0, 6,  6, vTask_valveProcess},	//30ms每次
+	{0, 0, 10,  10, vTaskQUEProcess},		//40ms每次
+	{0, 0, 20,  20, vTask_valveCalc},	//50ms每次
 };
 
 
@@ -32,7 +34,7 @@ void TaskInit(void)
 	vCd4051Init();
 	vRelayInit();
 
-
+	vQUEInit();
 	SystickInit();		//start at lsat
 }
 
@@ -80,5 +82,14 @@ void vTPCChangeTaskRunTime(uint8_t ntasks,uint8_t newtime)
 		return;
 	}
 	TaskComps[ntasks].Timer = newtime;
+}
+
+void vTPCSuspendTask(uint8_t ntasks,uint8_t state)
+{
+	if (ntasks>=TASKS_MAX)
+	{
+		return;
+	}
+	TaskComps[ntasks].Suspend = state;
 }
 

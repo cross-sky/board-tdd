@@ -1,13 +1,14 @@
 #include "cominc.h"
 #define MAX_StopTimes 3
+#define MAX_RunTimes 3
 
 uint8_t waterCheckFlag=0;
 
 IODectectErrStruct ioErrDectect[IOERR_MAX] ={
-	{ERR_LOW_PREESURE,IOERR_OFF,0,0,MAX_StopTimes,0},
-	{ERR_HIGH_PREESURE,IOERR_OFF,0,0,MAX_StopTimes,0},
-	{ERR_WATER_OPEN,IOERR_OFF,0,0,MAX_StopTimes,0},
-	{ERR_TEMPERA110,IOERR_OFF,0,0,MAX_StopTimes,0},
+	{ERR_LOW_PREESURE,IOERR_OFF,0,0,MAX_RunTimes,0},
+	{ERR_HIGH_PREESURE,IOERR_OFF,0,0,MAX_RunTimes,0},
+	{ERR_WATER_OPEN,IOERR_OFF,0,0,MAX_RunTimes,0},
+	{ERR_TEMPERA110,IOERR_OFF,0,0,MAX_RunTimes,0},
 };
 
 ptrIODectectErr IODect_getStructAddress(void)

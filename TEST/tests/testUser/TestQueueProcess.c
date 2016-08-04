@@ -29,9 +29,35 @@ TEST(QueueProcess, OffStateToOnstateThenToOffState)
 {
 	TEST_ASSERT_EQUAL(SIG_OFF,vqueGetMachineState());
 	xQUESigPush(SIG_ON);
-	vTask3QUEProcess();
+	vTaskQUEProcess();
+	vTaskQUEProcess();
+	vTaskQUEProcess();
+	vTaskQUEProcess();
+	vTaskQUEProcess();
+	vTaskQUEProcess();
 	TEST_ASSERT_EQUAL(SIG_ON,vqueGetMachineState());
 	xQUESigPush(SIG_OFF);
-	vTask3QUEProcess();
+	vTaskQUEProcess();
+	vTaskQUEProcess();
+	vTaskQUEProcess();
 	TEST_ASSERT_EQUAL(SIG_OFF,vqueGetMachineState());
+}
+
+TEST(QueueProcess, QueProcessFunOn)
+{
+	uint16_t i;
+	//TEST_ASSERT_EQUAL(0,vQueCheck3MinDelay());
+
+	for (i=0;i<=20*180;i++)
+	{
+		vQueCheck3MinDelay();
+	}
+	TEST_ASSERT_EQUAL(1,vQueCheck3MinDelay());
+
+	xQUESigPush(SIG_ON);
+	for (i=0;i<500;i++)
+	{
+		vTaskQUEProcess();
+	}
+	TEST_ASSERT_EQUAL(SIG_ON,vqueGetMachineState());
 }

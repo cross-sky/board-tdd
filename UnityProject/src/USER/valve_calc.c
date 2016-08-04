@@ -4,6 +4,10 @@
 
 uint8_t valveCalcStartFlag= STATE_OFF;
 
+
+//1.在funon中init退出前设置on，
+//2.exit设置off
+//3.funoff设置off
 void ValveCalc_setStartFlag(uint8_t state)
 {
 	valveCalcStartFlag = state;
@@ -200,7 +204,7 @@ void valveClac_runDone(ValveKinds valveKind)
 void ValveCalc_valveRun(ValveKinds valveKind)
 {
 	int16_t runStep;
-	static uint8_t i=0;
+	//static uint8_t i=0;
 	runStep = getValveStep(valveKind);
 	if (runStep == 0)
 	{
@@ -388,9 +392,56 @@ void ValveCalc_command5PushSig(int8_t data, uint16_t valveKind)
 
 void vTask_valveCalc(void)
 {	
+	//100ms * 10 * 120s
+	static uint16_t i=0;
 	if (ValveClac_getStartFlag() == STATE_ON)
 	{
-		ValveCalc_calcValveMain(ValveMainA);
+		i++;
+		if (i>=1200)
+		{
+			ValveCalc_calcValveMain(ValveMainA);
+			i=0;
+		}
+
+	}else{
+		i=0;
 	}
 }
 
+
+void ValveCalc_valveInit(void)
+{
+	//1.上电初始化，2.进入除霜进行一次初始化
+	ValveSig_t valveSig;
+
+	//..找到0位置 往回走
+	valveSig.sig = valveInit;
+	valveSig.code = 0;
+	valveSig.kindValue = ValveMainA;
+	ValveCalc_pushSig(&valveSig);
+	valveSig.kindValue = ValveSubB;
+	ValveCalc_pushSig(&valveSig);
+	//..初始开度
+	valveSig.sig = valveRun;
+	valveSig.code = 300;
+	valveSig.kindValue = ValveMainA;
+	ValveCalc_pushSig(&valveSig);
+	//..补齐阀默认关闭
+	//valveSig.kindValue = ValveSubB;
+	//ValveCalc_pushSig(&valveSig);
+
+}
+
+void ValveCalc_valveClose(void)
+{
+	//关机时关闭
+	ValveSig_t valveSig;
+	//..找到0位置
+	valveSig.sig = valveClose;
+	valveSig.code = 0;
+	valveSig.kindValue = ValveMainA;
+	ValveCalc_pushSig(&valveSig);
+	valveSig.kindValue = ValveSubB;
+	ValveCalc_pushSig(&valveSig);
+
+}

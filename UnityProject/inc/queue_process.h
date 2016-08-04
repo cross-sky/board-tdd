@@ -105,7 +105,7 @@ int16_t iQUE_getSuperheat(void);
 
 CoreProcess_t* xQue_getCoreData(void);
 
-void vTask3QUEProcess(void);
+void vTaskQUEProcess(void);
 void vQUEInit(void);
 
 void iQUE_ValveChanges(ValveKinds valveKind,uint16_t step);

@@ -5,5 +5,5 @@ TEST_GROUP_RUNNER(QueueProcess)
 {
 	RUN_TEST_CASE(QueueProcess, TestDelay3Min);
 	RUN_TEST_CASE(QueueProcess, OffStateToOnstateThenToOffState);
-
+	RUN_TEST_CASE(QueueProcess, QueProcessFunOn);
 }

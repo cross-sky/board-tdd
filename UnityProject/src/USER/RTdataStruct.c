@@ -181,8 +181,10 @@ uint16_t RT_command4SendReturn(int8_t *txAddr)
 	j += sprintf((char *)(txAddr+j), " cdIostate %x,",returnData.cd4051DectState);
 
 	j += sprintf((char *)(txAddr+j), " mstate %d",returnData.machineA.state);//..........
+	j += sprintf((char *)(txAddr+j), " relays %d",returnData.relaysValue);//..........	
 	j += sprintf((char *)(txAddr+j), " valMAstep %d,",returnData.machineA.valveMainStep);
 	j += sprintf((char *)(txAddr+j), " valSBstep %d\r\n",returnData.machineA.valveSubStep);
+
 
 
 	i++;

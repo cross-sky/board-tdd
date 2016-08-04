@@ -27,8 +27,8 @@ const uint16_t tableValve[ValveKindsMax][8]={
 
 //继电器bit位置，在relayValveData中
 const uint8_t rekayIndex[16]={
-	0, 7, 6, 5, 4, 3, 2, 1,
-	8, 9, 10,11,12,13,14,15
+	15, 6, 7, 3, 5, 4, 2, 1,
+	0, 9, 10,11,12,13,14,15
 };
 
 //电子膨胀阀A的bit位置
@@ -127,6 +127,7 @@ void vRelayInit(void)
 	GPIO_InitTypeDef GPIO_InitStructure;
 	uint8_t name;
 
+
 	//手动开CLK吧，也就几个
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 
@@ -143,6 +144,9 @@ void vRelayInit(void)
 
 	HC1_L(HC1_OE);
 	vHC1DataOut(0);
+
+	//上电初始化
+	ValveCalc_valveInit();
 }
 
 

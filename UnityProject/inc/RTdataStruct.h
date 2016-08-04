@@ -104,9 +104,10 @@ typedef struct Command3ReturnDataStruct{
 
 	uint16_t errType;
 	uint16_t cd4051DectState;	//cd4051״̬
-
+	uint16_t relaysValue;
 	RunState_t runState;
 	Machine_t machineA;
+	
 }Command3ReturnDataStruct;
 
 //not need to return ok

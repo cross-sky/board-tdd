@@ -207,3 +207,4 @@ TEST(ValveCalc, valveCalcValveMainWhenForwardAndBack)
 
 	TEST_ASSERT_EQUAL((VALVE_STEPSInit>>1)*(-1),tsig.code);
 }
+

@@ -173,11 +173,13 @@ void vqueSetNewFuntion(ptrfuntion newFun)
 	coreProcess.functions=newFun;
 }
 
+//运行在off and hold fun中
 uint8_t vQueCheck3MinDelay(void)
 {
 	static uint8_t flag=STATE_OFF;
 	static uint16_t delay3Min=STATE_OFF;
-	if (vqueGetMachineState() == SIG_ON || vqueGetMachineState() == SIG_DEFROST)
+	//在funon and fundefrost 的runstate 状态下，重置为1
+	if ((vqueGetMachineState() == SIG_ON || vqueGetMachineState() == SIG_DEFROST) && coreProcess.funState==FUN_STATE_RUN)
 	{
 		flag = STATE_OFF;
 	}
@@ -276,11 +278,14 @@ uint8_t vqueFunOff(void)
 			vRelaySet(Relay02Valve4way, STATE_OFF);
 			vRelaySet(Relay01Compressor, STATE_OFF);
 
+			ValveCalc_setStartFlag(STATE_OFF);
+
 			return FUN_STATE_INIT;
 		}
 	case FUN_STATE_RUN:
 		{
 			//无动作 直接退出
+			vQueCheck3MinDelay();
 			return SIG_NULL;
 		}
 	case FUN_STATE_EXIT:
@@ -298,6 +303,7 @@ uint8_t vqueFunOff(void)
 
 uint8_t vqueFunOn(void)
 {
+	
 	switch(coreProcess.funState)
 	{
 	case FUN_STATE_INIT:
@@ -314,7 +320,10 @@ uint8_t vqueFunOn(void)
 				}
 			case Time10s:
 				{
-					//2@@@@@@@@@@@检测水流闭合
+					//2@@@@@@@@@@@检测水流闭合,无温度异常，高低压闭合....
+
+
+
 					vRelaySet(Relay09Motor, STATE_ON);
 					if (vQueCheck3MinDelay() == STATE_ON)
 					{
@@ -327,6 +336,8 @@ uint8_t vqueFunOn(void)
 					//开启压缩机
 					vRelaySet(Relay01Compressor,STATE_ON);
 					timeFlag=0;
+
+					ValveCalc_setStartFlag(STATE_ON);
 					return FUN_STATE_INIT;
 				}
 			default:break;
@@ -373,6 +384,7 @@ uint8_t vqueFunOn(void)
 					vRelaySet(Relay09Motor, STATE_OFF);
 					vRelaySet(Relay03CyclePump, STATE_OFF);
 					timeFlag=0;
+					ValveCalc_setStartFlag(STATE_OFF);
 					return FUN_STATE_EXIT;
 				}
 			default:break;
@@ -437,6 +449,8 @@ uint8_t vqueFunDefrost(void)
 				{
 					//2@@@@@@@@@@@检测水流闭合 待写.....
 					//vRelaySet(Relay09Motor, STATE_ON);
+
+					ValveCalc_valveInit();
 					break;
 				}
 			case Time60s:
@@ -532,6 +546,9 @@ uint8_t vqueFunHold(void)
 			{
 				xQUESigPush(SIG_ON);
 			}
+
+
+			vQueCheck3MinDelay();
 			return SIG_NULL;
 		}
 	case FUN_STATE_EXIT:
@@ -578,15 +595,17 @@ void vqueNormalEventProcess(void)
 {
 	uint8_t tSig;
 	uint8_t tmstate;
-	//清除从退出运行到run标志(状态转换完成标志)
-	coreProcess.funExcuted = 0;
-	//外部/内部事件进行强制转换
-	coreProcess.funState=FUN_STATE_EXIT;
 
 	tSig=xQUESigPop();
 
 	if (tSig != SIG_NULL)
 	{
+		//清除从退出运行到run标志(状态转换完成标志)
+		coreProcess.funExcuted = 0;
+		//外部/内部事件进行强制转换
+		coreProcess.funState=FUN_STATE_EXIT;
+
+
 		tmstate = vqueGetMachineState();
 		vqueSetMachineState((SigState)tSig);
 
@@ -661,6 +680,7 @@ void vqueNormalEventProcess(void)
 void vqueExternalOffEvent(void)
 {
 	uint8_t tSig;
+	//在这里或者funoff中init设置所有关闭
 	//程序处在init 或 exit阶段，进行强制退出
 	//1.get sig，popsig,timeflag to 0,set funoff,set funstate_init, set fun_excuted;
 	//2.set machinestate to off
@@ -672,6 +692,8 @@ void vqueExternalOffEvent(void)
 		vqueSetNewFuntion(vqueFunOff);
 		//进入init阶段时，要把temfun设置为要运行的函数
 		coreProcess.funState=FUN_STATE_INIT;
+
+		//运行funoff
 		coreProcess.tempfun=coreProcess.functions;
 
 		coreProcess.funExcuted = FUN_EXCUTED;
@@ -710,7 +732,7 @@ void vqueFunStateChangeFromFunction(uint8_t tSig)
 	}
 }
 
-void vTask3QUEProcess(void)
+void vTaskQUEProcess(void)
 {
 	uint8_t tSig;
 	if (coreProcess.funExcuted == FUN_EXCUTED)
@@ -754,7 +776,6 @@ void vQUEInit(void)
 	coreProcess.prefunction=vqueFunOff;
 
 	vqueSetMachineState(SIG_OFF);
-
 }
 
 
@@ -765,6 +786,8 @@ void vQUEInit(void)
 //....................................................................
 void vQUEGetTemperParams(Command3ReturnDataStruct *dstData)
 {
+	RelayAndValveDataStruct* relasValue;
+	relasValue = vRelay_getDataStruct();
 	dstData->waterIn = coreProcess.coreParems.waterIn;
 	dstData->waterOut = coreProcess.coreParems.waterOut;
 	dstData->waterBank = coreProcess.coreParems.waterBank;
@@ -784,6 +807,8 @@ void vQUEGetTemperParams(Command3ReturnDataStruct *dstData)
 	dstData->runState.elecState = coreProcess.runState.elecState;
 	dstData->errType = coreProcess.coreParems.errState;
 	dstData->cd4051DectState = coreProcess.coreParems.cd4051DectState;
+
+	dstData->relaysValue = relasValue->relaysAndValveMainA;
 
 	//进 出 环 水箱 吸 排 蒸 电流互感 adc错误 cd4051错误 内部温度  (高位在前)
 	
