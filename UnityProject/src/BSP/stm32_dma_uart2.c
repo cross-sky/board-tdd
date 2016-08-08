@@ -14,7 +14,7 @@ static UartProcess_t uart2RxProcess={
 
 static uint8_t stateUart = STATE_ON;
 
-#define  Tx2BUF_MAX 200
+#define  Tx2BUF_MAX 300
 static uint8_t TxBuff[Tx2BUF_MAX]={0};
 
 TabUart2TxFun uart2TxFun={

@@ -801,6 +801,7 @@ void vQUEGetTemperParams(Command3ReturnDataStruct *dstData)
 	dstData->machineA.evaporateTemper = coreProcess.coreParems.machineA.evaporateTemper;
 	dstData->machineA.valveMainStep = coreProcess.coreParems.machineA.valveMainStep;
 	dstData->machineA.valveSubStep = coreProcess.coreParems.machineA.valveSubStep;
+	dstData->machineA.current = coreProcess.coreParems.machineA.current;
 
 	dstData->runState.machineState = coreProcess.runState.machineState;
 	

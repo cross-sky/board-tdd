@@ -148,6 +148,12 @@ void Inp_convertRealNtc(void)
 		dataInput.realNtc[i]=iADCTemperCalc10K(index,searchValue);
 	}
 
+	{
+		searchValue=dataInput.finaNtc[ADC05_AOUT];
+		index=uADCSearchData10KV2(searchValue);
+		dataInput.realNtc[ADC05_AOUT]=iADCTemperCalc10KV2(index,searchValue);
+	}
+
 	temp=(float)dataInput.finaNtc[ADCMAX-2]*0.00080f;
 	temp = (float)(1.43-temp)/0.0043f+25;
 	dataInput.realNtc[ADCMAX-2]=(uint16_t)(temp*10);

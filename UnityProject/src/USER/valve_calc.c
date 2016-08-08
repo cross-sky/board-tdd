@@ -416,7 +416,7 @@ void ValveCalc_valveInit(void)
 
 	//..找到0位置 往回走
 	valveSig.sig = valveInit;
-	valveSig.code = 0;
+	valveSig.code = 300;
 	valveSig.kindValue = ValveMainA;
 	ValveCalc_pushSig(&valveSig);
 	valveSig.kindValue = ValveSubB;

@@ -123,6 +123,50 @@ int16_t iADCTemperCalc10K(uint16_t index,uint16_t adcValue)
 	}
 }
 
+//.............2k
+uint16_t uADCSearchData10KV2(uint16_t searchValue)
+{
+	uint16_t max=ADC10KV2_INDEX_MAX;
+	uint16_t min=1;
+	uint16_t mid;
+
+	while(min<=max)
+	{
+		mid=(max+min)>>1;		//mean (max+min)/2
+		if (searchValue > ntcAdc10KV2[mid])
+		{
+			min=mid+1;
+		}
+		else
+			max=mid-1;
+	}
+
+	return min;
+}
+
+int16_t iADCTemperCalc10KV2(uint16_t index,uint16_t adcValue)
+{
+	int16_t t; 
+	if (index >= ADC10K_INDEX_MAX )
+	{
+		//@@@@@@return err
+		t=10*((int16_t)ADC10KV2_INDEX_MAX + (int16_t)ADC10KV2_TEMPER_REF -1);
+		return t;
+	}
+	else if(index <= ADC10KV2_INDEX_MIN)
+	{
+		return 10*(ADC10KV2_INDEX_MIN + ADC10KV2_TEMPER_REF -1);
+	}
+	else{
+		t = 10*(ntcAdc10K[index-1] - adcValue);
+		t /=(ntcAdc10K[index-1] - ntcAdc10K[index]);
+		t +=10*(index + ADC10KV2_TEMPER_REF -1);
+
+		return t;
+
+	}
+}
+
 
 
 uint16_t uADCSearchData50K(uint16_t searchValue)

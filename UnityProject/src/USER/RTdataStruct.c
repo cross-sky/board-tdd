@@ -101,10 +101,18 @@ void RT_command1Receiverequest(Command1RequestDataStruct *ptrC1)
 {
 	if (ptrC1->onOrOff == STATE_ON)
 	{
-		xQUESigPush(SIG_ON);
+		if (vqueGetMachineState() != STATE_ON)
+		{
+			xQUESigPush(SIG_ON);
+		}
 	}
 	else
-		xQUESigPush(SIG_OFF);
+	{
+		if (vqueGetMachineState() != STATE_OFF)
+		{
+			xQUESigPush(SIG_OFF);
+		}
+	}
 
 	if(ptrC1->defrost == STATE_ON)
 	{
@@ -177,10 +185,12 @@ uint16_t RT_command4SendReturn(int8_t *txAddr)
 	j += sprintf((char *)(txAddr+j), " airinT %d,",returnData.machineA.inTemper);
 	j += sprintf((char *)(txAddr+j), " airOutT %d,",returnData.machineA.outTemper);
 
+	j += sprintf((char *)(txAddr+j), " curI %d,",returnData.machineA.current);
+
 	j += sprintf((char *)(txAddr+j), " errType %d,",returnData.errType);
 	j += sprintf((char *)(txAddr+j), " cdIostate %x,",returnData.cd4051DectState);
 
-	j += sprintf((char *)(txAddr+j), " mstate %d",returnData.machineA.state);//..........
+	j += sprintf((char *)(txAddr+j), " mstate %d",returnData.runState.machineState);//..........
 	j += sprintf((char *)(txAddr+j), " relays %d",returnData.relaysValue);//..........	
 	j += sprintf((char *)(txAddr+j), " valMAstep %d,",returnData.machineA.valveMainStep);
 	j += sprintf((char *)(txAddr+j), " valSBstep %d\r\n",returnData.machineA.valveSubStep);

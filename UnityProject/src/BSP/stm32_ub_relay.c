@@ -6,12 +6,14 @@
 #define HC1_SHCP GPIO_Pin_9		//数据输入时钟线　
 
 #define HC1_PINS GPIO_Pin_9|GPIO_Pin_6|GPIO_Pin_7|GPIO_Pin_8
+#define VALVE_SUBB_PINS GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15
 
 #define HC1_H(pin) GPIOC->BSRR=pin
 #define HC1_L(pin) GPIOC->BRR=pin
 
 const IOControl relaysOut[]={
-	{0,  HC1_PINS, GPIOC ,RCC_APB2Periph_GPIOC}		
+	{0,  HC1_PINS, GPIOC ,RCC_APB2Periph_GPIOC},
+	{0,  VALVE_SUBB_PINS, GPIOB ,RCC_APB2Periph_GPIOB}
 };
 
 //电子膨胀阀和继电器对应的输出状态值，hc595统一输出
@@ -122,6 +124,14 @@ void vHC1DataOut(uint16_t dataOut)
 
 }
 
+void vValveSubDataOut(uint16_t dataOut)
+{
+	uint16_t tt;
+	tt =  GPIOB->IDR & (~ValVeSubBBits);
+	tt |= dataOut;
+	GPIOB->ODR = tt;
+}
+
 void vRelayInit(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -131,7 +141,7 @@ void vRelayInit(void)
 	//手动开CLK吧，也就几个
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 
-	for (name=0; name<1; name++)
+	for (name=0; name<2; name++)
 	{
 		//如上手动开了，就1个
 		//RCC_APB2PeriphClockCmd(controlCd4051[name].clk, ENABLE);
@@ -164,6 +174,12 @@ void vTask4RelayOutProcess(void)
 	}
 
 	//...........电子膨胀阀b
+
+	if (preValveB != data->valveSubB)
+	{
+		vValveSubDataOut(data->valveSubB);
+		preValveB = data->valveSubB;
+	}
 
 }
 
