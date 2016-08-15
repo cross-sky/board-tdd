@@ -1,6 +1,6 @@
 #include "cominc.h"
 
-#define VALVE_STEPS_ONECE	16	//默认每次运行最大步数
+#define VALVE_STEPS_ONECE	32	//默认每次运行最大步数
 
 uint8_t valveCalcStartFlag= STATE_OFF;
 

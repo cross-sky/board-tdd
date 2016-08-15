@@ -116,7 +116,7 @@ int16_t iQUE_getEvaporateTemper(void)
 //根据环温，排气温度，确定合适的过热度
 int16_t iQUE_getSuperheat(void)
 {
-	return 30;
+	return 50;
 }
 
 void iQUE_ValveChanges(ValveKinds valveKind,uint16_t step)
@@ -315,6 +315,7 @@ uint8_t vqueFunOn(void)
 			case Time3s:
 				{
 					vRelaySet(Relay03CyclePump, STATE_ON);
+					//vRelaySet(Relay02Valve4way, STATE_ON);
 					IODECT_startCheckWaterOpen();
 					break;
 				}
@@ -381,6 +382,7 @@ uint8_t vqueFunOn(void)
 				}
 			case Time10s:
 				{
+					vRelaySet(Relay02Valve4way, STATE_OFF);
 					vRelaySet(Relay09Motor, STATE_OFF);
 					vRelaySet(Relay03CyclePump, STATE_OFF);
 					timeFlag=0;

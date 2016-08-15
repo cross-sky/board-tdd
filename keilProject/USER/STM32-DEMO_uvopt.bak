@@ -171,18 +171,34 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>191</LineNumber>
+          <LineNumber>117</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134223220</Address>
+          <Address>134231876</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>E:\Docum\TDD\VsProject\UnityProject-2\keilProject\USER\..\..\UnityProject\src\USER\RTdataStruct.c</Filename>
+          <Filename>E:\Docum\TDD\VsProject\UnityProject-2\keilProject\USER\..\..\UnityProject\src\BSP\stm32_ub_dma_usart1.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\STM32_DEMO\../../UnityProject/src/USER/RTdataStruct.c\191</Expression>
+          <Expression>\\STM32_DEMO\../../UnityProject/src/BSP/stm32_ub_dma_usart1.c\117</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>123</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134231892</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>E:\Docum\TDD\VsProject\UnityProject-2\keilProject\USER\..\..\UnityProject\src\BSP\stm32_ub_dma_usart1.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\STM32_DEMO\../../UnityProject/src/BSP/stm32_ub_dma_usart1.c\123</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -227,6 +243,13 @@
           <ItemText>uartRxProcess</ItemText>
         </Ww>
       </WatchWindow1>
+      <MemoryWindow1>
+        <Mm>
+          <WinNumber>1</WinNumber>
+          <SubType>0</SubType>
+          <ItemText>0x200002c0</ItemText>
+        </Mm>
+      </MemoryWindow1>
       <DebugFlag>
         <trace>0</trace>
         <periodic>0</periodic>
@@ -271,7 +294,7 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>122</TopLine>
+      <TopLine>125</TopLine>
       <CurrentLine>133</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\CMSIS\startup\startup_stm32f10x_md.s</PathWithFileName>
@@ -713,7 +736,7 @@
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
       <TopLine>1</TopLine>
-      <CurrentLine>22</CurrentLine>
+      <CurrentLine>10</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\UnityProject\src\USER\main.c</PathWithFileName>
       <FilenameWithoutPath>main.c</FilenameWithoutPath>
@@ -724,10 +747,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>41</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>795</TopLine>
-      <CurrentLine>805</CurrentLine>
+      <TopLine>323</TopLine>
+      <CurrentLine>338</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\UnityProject\src\USER\queue_process.c</PathWithFileName>
       <FilenameWithoutPath>queue_process.c</FilenameWithoutPath>
@@ -738,10 +761,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>3</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>177</TopLine>
-      <CurrentLine>196</CurrentLine>
+      <TopLine>25</TopLine>
+      <CurrentLine>34</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\UnityProject\src\USER\RTdataStruct.c</PathWithFileName>
       <FilenameWithoutPath>RTdataStruct.c</FilenameWithoutPath>
@@ -782,7 +805,7 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>61</TopLine>
+      <TopLine>62</TopLine>
       <CurrentLine>65</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\UnityProject\src\USER\task.c</PathWithFileName>
@@ -796,8 +819,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>412</TopLine>
-      <CurrentLine>418</CurrentLine>
+      <TopLine>1</TopLine>
+      <CurrentLine>1</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\UnityProject\src\USER\valve_calc.c</PathWithFileName>
       <FilenameWithoutPath>valve_calc.c</FilenameWithoutPath>
@@ -817,7 +840,7 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>237</TopLine>
+      <TopLine>236</TopLine>
       <CurrentLine>252</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\UnityProject\src\BSP\stm32_dma_uart2.c</PathWithFileName>
@@ -857,10 +880,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>20</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>36</TopLine>
-      <CurrentLine>44</CurrentLine>
+      <TopLine>108</TopLine>
+      <CurrentLine>123</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\UnityProject\src\BSP\stm32_ub_dma_usart1.c</PathWithFileName>
       <FilenameWithoutPath>stm32_ub_dma_usart1.c</FilenameWithoutPath>

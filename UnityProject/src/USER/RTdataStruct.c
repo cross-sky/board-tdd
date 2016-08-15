@@ -101,14 +101,14 @@ void RT_command1Receiverequest(Command1RequestDataStruct *ptrC1)
 {
 	if (ptrC1->onOrOff == STATE_ON)
 	{
-		if (vqueGetMachineState() != STATE_ON)
+		if (vqueGetMachineState() != SIG_ON)
 		{
 			xQUESigPush(SIG_ON);
 		}
 	}
 	else
 	{
-		if (vqueGetMachineState() != STATE_OFF)
+		if (vqueGetMachineState() != SIG_OFF)
 		{
 			xQUESigPush(SIG_OFF);
 		}
