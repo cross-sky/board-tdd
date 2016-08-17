@@ -84,6 +84,7 @@ typedef struct Command2RequestDataStruct{
 	int8_t setDefrostOutTemper;
 	int8_t setDefrostCycleTimes;
 	int8_t setDefrostInOffset;
+	int8_t setAirOut_WaterT;	//ÅÅÆø-Ë®ÎÂ²î
 }Command2RequestDataStruct;
 
 //command2returnDataStruct is the same as Command1ReturnDataStruct;
@@ -96,6 +97,7 @@ typedef struct Command3RequestDataStruct{
 
 typedef struct Command3ReturnDataStruct{
 	DataFrameStruct dataFrame;
+	uint16_t waterSet;
 	int16_t waterIn;
 	int16_t waterOut;
 	int16_t waterBank;

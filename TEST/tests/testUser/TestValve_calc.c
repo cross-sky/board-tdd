@@ -2,7 +2,7 @@
 #include "unity.h"
 #include "unity_fixture.h"
 
-#define VALVE_STEPSInit	16	//默认每次运行最大步数
+#define VALVE_STEPSInit	32	//默认每次运行最大步数
 
 static ValveStatus_t testValveData[ValveKindsMax]={
 	{statusDone,0,0,VALVE_STEPSInit,DirectHold,0},
@@ -11,6 +11,11 @@ static ValveStatus_t testValveData[ValveKindsMax]={
 ValveProcess_t *valveSigs;
 ValveSig_t sig;
 CoreProcess_t *queData;
+
+int16_t getValveTotalStep(uint16_t valveKind)
+{
+	return testValveData[valveKind].totalSteps;
+}
 
 static void setInitTestValveData(uint16_t valveKind)
 {
@@ -26,6 +31,18 @@ void setQueDataInEvaTemper(int16_t inT,int16_t evaT)
 {
 	queData->coreParems.machineA.inTemper = inT*10;
 	queData->coreParems.machineA.evaporateTemper = evaT*10;
+}
+
+void setQueDataWaterAiroutEviTemper(int16_t waterT,int16_t airOutT,int16_t envirT)
+{
+	queData->coreParems.waterBank = waterT*10;
+	queData->coreParems.environT = envirT*10;
+	queData->coreParems.machineA.outTemper = airOutT*10;
+}
+
+void setQueDataAirOutT(int16_t airoutT)
+{
+	queData->coreParems.machineA.outTemper = airoutT*10;
 }
 
 TEST_GROUP(ValveCalc);
@@ -84,7 +101,7 @@ TEST(ValveCalc, CheckTotalStep)
 	sig.code = 500;
 	sig.sig = valveClose;
 	checkTotalSteps(&sig);
-	TEST_ASSERT_EQUAL(VALVE_CLOSE_STEP,testValveData[ValveMainA].totalSteps);
+	TEST_ASSERT_EQUAL(0,testValveData[ValveMainA].totalSteps);
 
 	sig.code = 10;
 	sig.sig = valveInit;
@@ -100,6 +117,7 @@ TEST(ValveCalc, valveCalcCheckProcess)
 	sig.kindValue = ValveMainA;
 
 	setInitTestValveData(0);
+
 
 	ValveCalc_pushSig(&sig);
 	ValveCalc_checkProcess(ValveMainA);
@@ -124,8 +142,9 @@ TEST(ValveCalc, valveCalcValveMainWhen4TimesForward)
 	ValveSig_t tsig;
 
 	//1times foward
-	setQueDataInEvaTemper(10,5);
+	setQueDataInEvaTemper(12,5);
 	setInitTestValveData(0);
+	setQueDataAirOutT(90);
 
 	ValveCalc_calcValveMain(ValveMainA);
 	ValveCalc_popSig(&tsig);
@@ -160,6 +179,7 @@ TEST(ValveCalc, valveCalcValveMainWhen4TimesBack)
 	//1times Back
 	setQueDataInEvaTemper(6,5);
 	setInitTestValveData(0);
+	setQueDataAirOutT(90);
 
 	ValveCalc_calcValveMain(ValveMainA);
 	ValveCalc_popSig(&tsig);
@@ -192,8 +212,9 @@ TEST(ValveCalc, valveCalcValveMainWhenForwardAndBack)
 	ValveSig_t tsig;
 
 	//1times foward
-	setQueDataInEvaTemper(10,5);
+	setQueDataInEvaTemper(12,5);
 	setInitTestValveData(0);
+	setQueDataAirOutT(90);
 
 	ValveCalc_calcValveMain(ValveMainA);
 	ValveCalc_popSig(&tsig);
@@ -208,3 +229,82 @@ TEST(ValveCalc, valveCalcValveMainWhenForwardAndBack)
 	TEST_ASSERT_EQUAL((VALVE_STEPSInit>>1)*(-1),tsig.code);
 }
 
+TEST(ValveCalc, TestValveCalc_calcValveSub)
+{
+	uint16_t i;
+	ValveSig_t tsig;
+	int16_t water;
+	int16_t airout;
+	int16_t envir;
+
+	//airout>100
+	water = 30;
+	airout = 105;
+	envir = 10;
+	setQueDataWaterAiroutEviTemper(water, airout, envir);
+	ValveCalc_calcValveSub(ValveSubB);
+	ValveCalc_popSig(&tsig);
+	TEST_ASSERT_EQUAL((airout-100)/2,tsig.code);
+
+	//airout<100, envir>5
+	water = 30;
+	airout = 90;
+	envir = 10;
+	setInitTestValveData(ValveSubB);
+	testValveData[ValveSubB].totalSteps = 10;
+	setQueDataWaterAiroutEviTemper(water, airout, envir);
+	ValveCalc_calcValveSub(ValveSubB);
+
+	ValveCalc_checkProcess(ValveSubB);
+	for(i=0;i<10 ;i++)
+	{
+		ValveCalc_checkProcess(ValveSubB);
+	}
+	
+	TEST_ASSERT_EQUAL(0,testValveData[ValveSubB].totalSteps);
+	
+
+	//airout<100 envir<5 airout-water=26
+	water = 30;
+	airout = 56;
+	envir = 4;
+	setQueDataWaterAiroutEviTemper(water, airout, envir);
+	ValveCalc_calcValveSub(ValveSubB);
+	ValveCalc_popSig(&tsig);
+	TEST_ASSERT_EQUAL((airout-water-20)/2,tsig.code);
+
+	//airout<100 envir<5 airout-water=30
+	water = 30;
+	airout = 60;
+	envir = 4;
+	setQueDataWaterAiroutEviTemper(water, airout, envir);
+	ValveCalc_calcValveSub(ValveSubB);
+	ValveCalc_popSig(&tsig);
+	TEST_ASSERT_EQUAL(4,tsig.code);
+
+	//airout<100 envir<5 airout-water=12
+	water = 30;
+	airout = 42;
+	envir = 4;
+	setQueDataWaterAiroutEviTemper(water, airout, envir);
+	ValveCalc_calcValveSub(ValveSubB);
+	ValveCalc_popSig(&tsig);
+	TEST_ASSERT_EQUAL((airout-water - 16)/2,tsig.code);
+
+	//airout<100 envir<5 airout-water=6
+	water = 30;
+	airout = 36;
+	envir = 4;
+	setQueDataWaterAiroutEviTemper(water, airout, envir);
+	ValveCalc_calcValveSub(ValveSubB);
+	ValveCalc_popSig(&tsig);
+	TEST_ASSERT_EQUAL(-4,tsig.code);
+
+	//airout<100 envir<5 airout-water=18
+	water = 30;
+	airout = 48;
+	envir = 4;
+	setQueDataWaterAiroutEviTemper(water, airout, envir);
+	ValveCalc_calcValveSub(ValveSubB);
+	TEST_ASSERT_EQUAL(FALSE,ValveCalc_popSig(&tsig));
+}

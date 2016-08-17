@@ -4,6 +4,20 @@
 
 uint8_t valveCalcStartFlag= STATE_OFF;
 
+typedef enum {
+	IndexInitStep,
+	IndexCloseStep,
+	IndexMinStep,
+	IndexMaxStep,
+	ValveEnumMax
+}ValveEnum;
+
+int16_t TabValveParams[ValveKindsMax][ValveEnumMax]={
+	{VALVE_INIT_STEP,VALVE_CLOSE_STEP,VALVE_MIN_STEP,VALVE_MAX_STEP},
+	{VALVE_INIT_STEP,VALVE_CLOSE_STEP,VALVE_MIN_STEP,VALVE_MAX_STEP-200}
+};
+
+
 
 //1.在funon中init退出前设置on，
 //2.exit设置off
@@ -17,6 +31,7 @@ uint8_t ValveClac_getStartFlag(void)
 {
 	return valveCalcStartFlag;
 }
+
 
 ValveStatus_t valveStatus[ValveKindsMax]={
 	{statusDone,0,0,VALVE_STEPS_ONECE,DirectHold,0},
@@ -59,6 +74,18 @@ uint16_t getValveState(ValveKinds valveKind)
 int16_t getValveStep(ValveKinds valveKind)
 {
 	return prtvalveStatus[valveKind].runStep;
+}
+
+
+
+int16_t getLowerLimit(void)
+{
+	return iQUE_getUpperLimit()-40;
+}
+
+int16_t getValveTotalStep(uint16_t valveKind)
+{
+	return valveStatus[valveKind].totalSteps;
 }
 
 uint8_t ValveCalc_popSig(ValveSig_t *sig)
@@ -108,27 +135,28 @@ void checkTotalSteps(ValveSig_t *sig)
 	{
 		if (tsig == valveInit)
 		{
-			ptrvalveStatus->runStep = VALVE_INIT_STEP;
+			ptrvalveStatus->runStep = TabValveParams[tvalveKind][IndexInitStep];
 			ptrvalveStatus->totalSteps = 0;
 		}
 		else
 		{
-			ptrvalveStatus->runStep = VALVE_CLOSE_STEP - ptrvalveStatus->totalSteps;
-			ptrvalveStatus->totalSteps = VALVE_CLOSE_STEP;
+			//close run total + 8;反向走
+			ptrvalveStatus->runStep = 0-(ptrvalveStatus->totalSteps + TabValveParams[tvalveKind][IndexCloseStep]);
+			ptrvalveStatus->totalSteps = 0;
 		}
 	}
 	//开度有限制 确保totalstep和runstep在范围内
 	else if (tsig == valveRun)
 	{
-		if ((ptrvalveStatus->totalSteps + tcode) < VALVE_MIN_STEP )
+		if ((ptrvalveStatus->totalSteps + tcode) < TabValveParams[tvalveKind][IndexMinStep] )
 		{
-			ptrvalveStatus->runStep = VALVE_MIN_STEP - ptrvalveStatus->totalSteps;
-			ptrvalveStatus->totalSteps = VALVE_MIN_STEP;
+			ptrvalveStatus->runStep = TabValveParams[tvalveKind][IndexMinStep] - ptrvalveStatus->totalSteps;
+			ptrvalveStatus->totalSteps = TabValveParams[tvalveKind][IndexMinStep];
 		}
-		else if ((ptrvalveStatus->totalSteps + tcode) > VALVE_MAX_STEP)
+		else if ((ptrvalveStatus->totalSteps + tcode) > TabValveParams[tvalveKind][IndexMaxStep])
 		{
-			ptrvalveStatus->runStep = VALVE_MAX_STEP - ptrvalveStatus->totalSteps;
-			ptrvalveStatus->totalSteps = VALVE_MAX_STEP;
+			ptrvalveStatus->runStep = TabValveParams[tvalveKind][IndexMaxStep] - ptrvalveStatus->totalSteps;
+			ptrvalveStatus->totalSteps = TabValveParams[tvalveKind][IndexMaxStep];
 		}
 		else{
 			ptrvalveStatus->runStep = tcode;
@@ -335,6 +363,16 @@ void ValveCalc_calcValveMain(ValveKinds valveKind)
 {
 	int16_t superHeat,subT;
 	ValveSig_t sig;
+	//0.1 排气温度>100,
+	if (iQUE_getAirOutTemper() > AirOutTemperMax100)
+	{
+		sig.code = (iQUE_getAirOutTemper()- AirOutTemperMax100-10)/10;
+		sig.kindValue = ValveMainA;
+		sig.sig = valveRun;
+		ValveCalc_pushSig(&sig);
+		return;
+	}
+
 	//1. 计算吸气-蒸发
 	subT = iQUE_getInTemper() - iQUE_getEvaporateTemper();
 	//2.获取目标过热度
@@ -397,9 +435,10 @@ void vTask_valveCalc(void)
 	if (ValveClac_getStartFlag() == STATE_ON)
 	{
 		i++;
-		if (i>=1200)
+		if (i>=900)
 		{
 			ValveCalc_calcValveMain(ValveMainA);
+			ValveCalc_calcValveSub(ValveSubB);
 			i=0;
 		}
 
@@ -408,6 +447,75 @@ void vTask_valveCalc(void)
 	}
 }
 
+
+void ValveCalc_valveClose(void)
+{
+	//关机时关闭
+	ValveSig_t valveSig;
+	//..找到0位置
+	valveSig.sig = valveClose;
+	valveSig.code = 0;
+	valveSig.kindValue = ValveMainA;
+	ValveCalc_pushSig(&valveSig);
+	valveSig.kindValue = ValveSubB;
+	ValveCalc_pushSig(&valveSig);
+}
+
+
+//计算补气电子膨胀阀
+void ValveCalc_calcValveSub(ValveKinds valveKind)
+{
+	int16_t airoutT = iQUE_getAirOutTemper();
+	int16_t value = airoutT - iQUE_getWaterBankTemper();
+	int16_t steps=0;
+	ValveSig_t sig;
+
+	if (airoutT >= AirOutTemperMax100)
+	{
+		//1. run (airoutT - 110 )/20 steps,
+		steps = (airoutT- AirOutTemperMax100 - 10)/20;
+		sig.code = steps;
+		sig.kindValue = ValveSubB;
+		sig.sig = valveRun;
+		ValveCalc_pushSig(&sig);
+		return;
+	}
+	if (iQUE_getEvirTemper() >= EnvirTemper5)
+	{
+		if (getValveTotalStep(valveKind) != 0)
+		{
+			sig.code = 500;	//any value but 0
+			sig.kindValue = ValveSubB;
+			sig.sig = valveClose;
+			ValveCalc_pushSig(&sig);
+		}
+		return;
+	}
+
+	if (value > iQUE_getUpperLimit()  )
+	{
+		//run (value- upperLimit)/20 steps, max run 4 steps
+		steps = (value - iQUE_getUpperLimit())/20;
+		if (steps>4)
+		{
+			steps = 4;
+		}
+	}else if (value < getLowerLimit())
+	{
+		steps = (value - getLowerLimit())/20;
+		if (steps < -4)
+		{
+			steps = -4;
+		}
+	}else{
+		steps = 0;
+	}
+
+	sig.code = steps;	//any value but 0
+	sig.kindValue = ValveSubB;
+	sig.sig = valveRun;
+	ValveCalc_pushSig(&sig);
+}
 
 void ValveCalc_valveInit(void)
 {
@@ -427,21 +535,13 @@ void ValveCalc_valveInit(void)
 	valveSig.kindValue = ValveMainA;
 	ValveCalc_pushSig(&valveSig);
 	//..补齐阀默认关闭
-	//valveSig.kindValue = ValveSubB;
-	//ValveCalc_pushSig(&valveSig);
-
-}
-
-void ValveCalc_valveClose(void)
-{
-	//关机时关闭
-	ValveSig_t valveSig;
-	//..找到0位置
-	valveSig.sig = valveClose;
-	valveSig.code = 0;
-	valveSig.kindValue = ValveMainA;
-	ValveCalc_pushSig(&valveSig);
-	valveSig.kindValue = ValveSubB;
-	ValveCalc_pushSig(&valveSig);
+	if (iQUE_getEvirTemper() >= EnvirTemper5)
+	{
+		valveSig.sig = valveRun;
+		valveSig.code = TabValveParams[ValveSubB][IndexInitStep];
+		valveSig.kindValue = ValveSubB;
+		ValveCalc_pushSig(&valveSig);
+	}
+	
 
 }

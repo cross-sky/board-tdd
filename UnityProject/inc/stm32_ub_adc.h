@@ -3,6 +3,9 @@
 #include "StateType.h"
 
 #define ADC_NeedRunCount	5
+#define AirOutTemperMax110 1100		//110度
+#define AirOutTemperMax100 1000		//110度
+#define EnvirTemper5		50		//5度
 
 typedef enum{
 	ADC01_ENVT,		//环温度

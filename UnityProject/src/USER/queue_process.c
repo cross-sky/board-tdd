@@ -113,10 +113,49 @@ int16_t iQUE_getEvaporateTemper(void)
 	return coreProcess.coreParems.machineA.evaporateTemper;
 }
 
-//根据环温，排气温度，确定合适的过热度
+
+
+//获取排气温度
+int16_t iQUE_getAirOutTemper(void)
+{
+	return coreProcess.coreParems.machineA.outTemper;
+}
+
+//获取环境温度
+int16_t iQUE_getEvirTemper(void)
+{
+	return coreProcess.coreParems.environT;
+}
+
+//获取水箱温度
+int16_t iQUE_getWaterBankTemper(void)
+{
+	return coreProcess.coreParems.waterBank;
+}
+
+//根据环温，水温确定合适的过热度
 int16_t iQUE_getSuperheat(void)
 {
-	return 50;
+	int16_t data=0;
+	int16_t envirT = iQUE_getEvirTemper();
+	if (envirT > 300)
+	{
+		data = 60;
+	}
+	else if (envirT < -100)
+	{
+		data = 20;
+	}else{
+		//-10时过热度2，0度时过热度3
+		data = envirT*0.1 + 30;
+	}
+
+	//水温>40度，过热度-1
+	if (iQUE_getWaterBankTemper() >= 400)
+	{
+		data -=10;
+	}
+	return data;
 }
 
 void iQUE_ValveChanges(ValveKinds valveKind,uint16_t step)
@@ -149,6 +188,11 @@ void vQUEDefrostInTemper(void)
 
 	coreProcess.coreParems.setDefrostInTemper=tdata-coreProcess.coreParems.setDefrostInOffset;
 
+}
+
+int16_t iQUE_getUpperLimit(void)
+{
+	return coreProcess.coreParems.setAirout_water;
 }
 
 
@@ -771,6 +815,8 @@ void vQUEInit(void)
 	coreProcess.coreParems.setDefrostCycleTimes=5*30*60*20;
 	coreProcess.coreParems.setDefrostInOffset=3*10;
 
+	coreProcess.coreParems.setAirout_water = 20*10;
+
 	coreProcess.funExcuted=FUN_EXCUTED;
 	coreProcess.funState=FUN_STATE_RUN;
 	coreProcess.tempfun=vqueFunOff;
@@ -790,6 +836,7 @@ void vQUEGetTemperParams(Command3ReturnDataStruct *dstData)
 {
 	RelayAndValveDataStruct* relasValue;
 	relasValue = vRelay_getDataStruct();
+	dstData->waterSet = coreProcess.coreParems.SetWaterTSet;
 	dstData->waterIn = coreProcess.coreParems.waterIn;
 	dstData->waterOut = coreProcess.coreParems.waterOut;
 	dstData->waterBank = coreProcess.coreParems.waterBank;
@@ -827,6 +874,7 @@ void vQueSetCoreParams(Command2RequestDataStruct *srcData)
 	coreProcess.coreParems.setDefrostOutTemper=(srcData->setDefrostOutTemper)*10;
 	coreProcess.coreParems.setDefrostCycleTimes=(srcData->setDefrostCycleTimes)*30*60*20;
 	coreProcess.coreParems.setDefrostInOffset=(srcData->setDefrostInOffset)*10;
+	coreProcess.coreParems.setAirout_water = (srcData->setAirOut_WaterT)*10;
 }
 
 

@@ -44,8 +44,9 @@ typedef struct{
 	int16_t setDefrostInTemper;	//进入除霜温度
 	uint32_t setDefrostRunTimes;		//除霜时间
 
-	int16_t setDefrostOutTemper;		//退出除霜温度
 	uint32_t setDefrostCycleTimes;		//除霜周期
+	int16_t setDefrostOutTemper;		//退出除霜温度
+
 	int16_t setDefrostInOffset;			//除霜进入偏差
 
 	int16_t setDefrostMode;			//除霜控制方式	
@@ -63,6 +64,8 @@ typedef struct{
 	//。。。。..
 	uint16_t errState;	//err错误状态
 	uint16_t cd4051DectState;	//cd4051错误状态
+
+	int16_t setAirout_water;		//排气-水温插值
 
 	int16_t waterIn;
 	int16_t waterOut;
@@ -102,6 +105,12 @@ void vQUEGetTemperParams(Command3ReturnDataStruct *dstData);
 int16_t iQUE_getInTemper(void);
 int16_t iQUE_getEvaporateTemper(void);
 int16_t iQUE_getSuperheat(void);
+
+int16_t iQUE_getAirOutTemper(void);
+int16_t iQUE_getEvirTemper(void);
+int16_t iQUE_getWaterBankTemper(void);
+int16_t iQUE_getUpperLimit(void);
+
 
 CoreProcess_t* xQue_getCoreData(void);
 

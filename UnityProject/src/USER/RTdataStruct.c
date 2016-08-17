@@ -175,6 +175,8 @@ uint16_t RT_command4SendReturn(int8_t *txAddr)
 	vQUEGetTemperParams(&returnData);
 
 	j=sprintf((char *)txAddr, "i %d,",i);
+	j += sprintf((char *)(txAddr+j), " wSet %d,",returnData.waterSet);
+
 	j += sprintf((char *)(txAddr+j), " WIn %d,",returnData.waterIn);
 //	j += sprintf((char *)(txAddr+j), " wOut %d,",returnData.waterOut);
 	j += sprintf((char *)(txAddr+j), " wBank %d,",returnData.waterBank);
@@ -194,8 +196,6 @@ uint16_t RT_command4SendReturn(int8_t *txAddr)
 	j += sprintf((char *)(txAddr+j), " relays %d",returnData.relaysValue);//..........	
 	j += sprintf((char *)(txAddr+j), " valMAstep %d,",returnData.machineA.valveMainStep);
 	j += sprintf((char *)(txAddr+j), " valSBstep %d\r\n",returnData.machineA.valveSubStep);
-
-
 
 	i++;
 	return j;
@@ -237,6 +237,7 @@ void RT_command2CreateRequest(Command2RequestDataStruct *ptrc2)
 	ptrc2->setDefrostOutTemper = 10;
 	ptrc2->setDefrostCycleTimes = 50;
 	ptrc2->setDefrostInOffset = 6;
+	ptrc2->setAirOut_WaterT = 20;
 
 	adddata = RT_dataAdd(len,buf);
 	buf[len] = adddata;

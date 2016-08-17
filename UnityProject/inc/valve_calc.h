@@ -5,7 +5,7 @@
 #define ValveBuffLenMask 0x0f
 
 #define VALVE_INIT_STEP -560
-#define VALVE_CLOSE_STEP 500
+#define VALVE_CLOSE_STEP 8
 #define VALVE_MIN_STEP	30
 #define VALVE_MAX_STEP	470
 
@@ -69,4 +69,8 @@ void vTask_valveCalc(void);
 
 void ValveCalc_valveInit(void);
 void ValveCalc_valveClose(void);
+
+void ValveCalc_calcValveSub(ValveKinds valveKind);
+
+
 #endif

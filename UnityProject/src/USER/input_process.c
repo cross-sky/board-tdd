@@ -104,7 +104,7 @@ uint16_t Inp_adcGetErr(void)
 void Inp_checkTempera110(void)
 {
 	uint16_t tdata;
-	if (dataInput.realNtc[ADC05_AOUT] >= 1100)
+	if (dataInput.realNtc[ADC05_AOUT] >= AirOutTemperMax110)
 	{
 		tdata = CDIN_OPEN;
 	}
