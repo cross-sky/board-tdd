@@ -8,6 +8,8 @@
 #define VALVE_CLOSE_STEP 8
 #define VALVE_MIN_STEP	30
 #define VALVE_MAX_STEP	470
+#define VALVE_COLDMAX_STEP 120
+#define VALVE_INITRUN_STEP		100
 
 typedef enum{
 	adds=2,
@@ -21,6 +23,13 @@ typedef enum{
 	DirectHold,		//不运行
 	DirectForward,	//运行方向 1正方向(增加)
 }VALVE_ENUM;
+
+typedef enum{
+	IndexDirectBack,
+	IndexDirectHold,
+	IndexDirectForward,
+	IndexDirectMax
+}IndexValveDirect_Enum;
 
 typedef enum ValveKinds{
 	ValveMainA = 0x00,
@@ -71,6 +80,6 @@ void ValveCalc_valveInit(void);
 void ValveCalc_valveClose(void);
 
 void ValveCalc_calcValveSub(ValveKinds valveKind);
-
+void ValveCalc_WorkerModelChangeParams(void);
 
 #endif

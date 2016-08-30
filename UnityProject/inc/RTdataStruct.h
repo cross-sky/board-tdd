@@ -46,6 +46,7 @@ typedef enum FUNCODE{
 	FunCode3,
 	FunCode4,
 	FunCode5,
+	FunCode6,
 	FunCodeMax
 }FUNCODE;
 
@@ -124,6 +125,7 @@ typedef struct Command5RequestDataStruct{
 	uint16_t data1Relay;	//指定继电器输出
 	int8_t data2ValveA;		//指定ValveA输出步数
 	int8_t data3ValveB;		//指定valveB输出步数
+	int16_t workModel;		//指定工作模式
 }Command5RequestDataStruct;
 
 uint8_t* puartGetRTxAddress(ptrUartNodesProcess nodes);

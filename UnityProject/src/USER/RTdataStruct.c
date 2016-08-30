@@ -207,6 +207,10 @@ void RT_command5ReceiveRequest(Command5RequestDataStruct *ptrc5)
 	vRelay_command5SetRealy(ptrc5->data1Relay);
 	ValveCalc_command5PushSig(ptrc5->data2ValveA, ValveMainA);
 	ValveCalc_command5PushSig(ptrc5->data3ValveB, ValveSubB);
+	if (ptrc5->workModel == SIG_MAKE_COLD || ptrc5->workModel == SIG_MAKE_HotWater)
+	{
+		iQUE_setWorkerModel(ptrc5->workModel);
+	}
 }
 
 void RT_command1CreateRequest(Command1RequestDataStruct *ptrc1)
@@ -280,6 +284,7 @@ void RT_command5CreateRequest(Command5RequestDataStruct *ptrc5, Command5RequestD
 	ptrc5->data1Relay = ptrc5Data->data1Relay;
 	ptrc5->data2ValveA = ptrc5Data->data2ValveA;
 	ptrc5->data3ValveB = ptrc5Data->data3ValveB;
+	ptrc5->workModel = SIG_MAKE_COLD;
 	adddata = RT_dataAdd(len,buf);
 	buf[len] = adddata;
 }

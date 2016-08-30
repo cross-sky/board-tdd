@@ -21,21 +21,7 @@ typedef struct
 }QueueProcess_t;
 
 
-typedef enum SigState{
-	SIG_NULL=0x00,		//
-	SIG_ON,				//
-	SIG_DEFROST,		//除霜
-	SIG_HOLD,			//保温
-	SIG_LOWT,			//极低温 <-15
-	SIG_OFF,			//关机状态
-	SIG_ERR,			//错误
-	SIG_NOERR,			//无错误
-	SIG_MAX,
-	FUN_EXCUTED,		//状态转换完成
-	FUN_STATE_INIT,		//函数初始化状态
-	FUN_STATE_RUN,		//函数运行状态
-	FUN_STATE_EXIT		//函数退出状态
-}SigState;
+
 
 
 typedef struct{
@@ -61,6 +47,9 @@ typedef struct{
 	int16_t setCompressorNumbers;	//压缩机数量
 	int16_t setCurrentProtectMax;	//电流保护基准
 	int16_t setPhaseProtect;		//相位保护
+
+	int16_t setWorkMode;			//制冷还是制热
+	int16_t setColdWaterT;			//制冷温度
 	//。。。。..
 	uint16_t errState;	//err错误状态
 	uint16_t cd4051DectState;	//cd4051错误状态
@@ -110,6 +99,8 @@ int16_t iQUE_getAirOutTemper(void);
 int16_t iQUE_getEvirTemper(void);
 int16_t iQUE_getWaterBankTemper(void);
 int16_t iQUE_getUpperLimit(void);
+int16_t iQUE_getWorkerModel(void);
+void iQUE_setWorkerModel(int16_t newstate);
 
 
 CoreProcess_t* xQue_getCoreData(void);
@@ -118,6 +109,8 @@ void vTaskQUEProcess(void);
 void vQUEInit(void);
 
 void iQUE_ValveChanges(ValveKinds valveKind,uint16_t step);
+void vQUE_changeWorkerModel(void);
+void checkWorkModelIsChange(void);
 /*
 void vQUESetADCDectState(uint16_t adcstate);
 */

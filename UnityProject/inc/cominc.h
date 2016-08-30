@@ -18,6 +18,29 @@ void __dsb(uint8_t);
 #include <string.h>
 #include<stdio.h>
 
+
+typedef enum SigState{
+	SIG_NULL=0x00,		//
+	SIG_ON,				//
+	SIG_DEFROST,		//除霜
+	SIG_HOLD,			//保温
+	SIG_LOWT,			//极低温 <-15
+	SIG_OFF,			//关机状态
+	SIG_ERR,			//错误
+	SIG_NOERR,			//无错误
+	SIG_MAKE_COLD,		//制冷
+	SIG_MAKE_HotWater,	//制热，
+	SIG_COLDON,			//
+	SIG_COLDHOLD,		//
+	SIG_MAX,
+	FUN_EXCUTED,		//状态转换完成
+	FUN_STATE_INIT,		//函数初始化状态
+	FUN_STATE_RUN,		//函数运行状态
+	FUN_STATE_EXIT,		//函数退出状态
+
+}SigState;
+
+
 #include "stm32f10x_conf.h"
 #include "stm32f10x.h"
 #include "stm32f10x_it.h"
@@ -45,19 +68,6 @@ void __dsb(uint8_t);
 #include "queue_process.h"
 
 #include "stm32_ub_relay.h"
-/*
-#include <string.h>
-
-
-#include<stdlib.h>
-
-
-#include "stdint.h"
-
-
-*/
-
-
 
 
 #endif

@@ -12,11 +12,24 @@ typedef enum {
 	ValveEnumMax
 }ValveEnum;
 
-int16_t TabValveParams[ValveKindsMax][ValveEnumMax]={
+int16_t TabValveParamsHeat[ValveKindsMax][ValveEnumMax]={
 	{VALVE_INIT_STEP,VALVE_CLOSE_STEP,VALVE_MIN_STEP,VALVE_MAX_STEP},
 	{VALVE_INIT_STEP,VALVE_CLOSE_STEP,VALVE_MIN_STEP,VALVE_MAX_STEP-200}
 };
 
+uint16_t TabValveDirect[IndexDirectMax]={
+	DirectBack,DirectHold,DirectForward
+};
+
+//定义指向n维数组的指针，n就是除第一维的另外维度
+//默认制热的步数
+int16_t (*ptrTabValveParams)[ValveEnumMax] = TabValveParamsHeat;
+
+//only change main valve
+void ValveCalc_ChangeTabValveParams(int16_t maxValveStep)
+{
+	ptrTabValveParams[ValveMainA][IndexMaxStep] = maxValveStep;
+}
 
 
 //1.在funon中init退出前设置on，
@@ -37,7 +50,10 @@ ValveStatus_t valveStatus[ValveKindsMax]={
 	{statusDone,0,0,VALVE_STEPS_ONECE,DirectHold,0},
 	{statusDone,0,0,VALVE_STEPS_ONECE,DirectHold,0}
 };
+
 ValveStatus_t* prtvalveStatus= valveStatus;
+
+
 
 ValveProcess_t valveProcess={
 	0,0
@@ -135,28 +151,28 @@ void checkTotalSteps(ValveSig_t *sig)
 	{
 		if (tsig == valveInit)
 		{
-			ptrvalveStatus->runStep = TabValveParams[tvalveKind][IndexInitStep];
+			ptrvalveStatus->runStep = ptrTabValveParams[tvalveKind][IndexInitStep];
 			ptrvalveStatus->totalSteps = 0;
 		}
 		else
 		{
 			//close run total + 8;反向走
-			ptrvalveStatus->runStep = 0-(ptrvalveStatus->totalSteps + TabValveParams[tvalveKind][IndexCloseStep]);
+			ptrvalveStatus->runStep = 0-(ptrvalveStatus->totalSteps + ptrTabValveParams[tvalveKind][IndexCloseStep]);
 			ptrvalveStatus->totalSteps = 0;
 		}
 	}
 	//开度有限制 确保totalstep和runstep在范围内
 	else if (tsig == valveRun)
 	{
-		if ((ptrvalveStatus->totalSteps + tcode) < TabValveParams[tvalveKind][IndexMinStep] )
+		if ((ptrvalveStatus->totalSteps + tcode) < ptrTabValveParams[tvalveKind][IndexMinStep] )
 		{
-			ptrvalveStatus->runStep = TabValveParams[tvalveKind][IndexMinStep] - ptrvalveStatus->totalSteps;
-			ptrvalveStatus->totalSteps = TabValveParams[tvalveKind][IndexMinStep];
+			ptrvalveStatus->runStep = ptrTabValveParams[tvalveKind][IndexMinStep] - ptrvalveStatus->totalSteps;
+			ptrvalveStatus->totalSteps = ptrTabValveParams[tvalveKind][IndexMinStep];
 		}
-		else if ((ptrvalveStatus->totalSteps + tcode) > TabValveParams[tvalveKind][IndexMaxStep])
+		else if ((ptrvalveStatus->totalSteps + tcode) > ptrTabValveParams[tvalveKind][IndexMaxStep])
 		{
-			ptrvalveStatus->runStep = TabValveParams[tvalveKind][IndexMaxStep] - ptrvalveStatus->totalSteps;
-			ptrvalveStatus->totalSteps = TabValveParams[tvalveKind][IndexMaxStep];
+			ptrvalveStatus->runStep = ptrTabValveParams[tvalveKind][IndexMaxStep] - ptrvalveStatus->totalSteps;
+			ptrvalveStatus->totalSteps = ptrTabValveParams[tvalveKind][IndexMaxStep];
 		}
 		else{
 			ptrvalveStatus->runStep = tcode;
@@ -297,7 +313,8 @@ void valveDirectHold(int16_t subT, int16_t superHeat,ValveKinds valveKind )
 	//目标过热度范围T+0.5 
 	if (subT > superHeat+5)
 	{
-		//1.步数保持上次，开度加大，次数+1
+		//1.步数保持上次，开度加大，次数+1 TabValveDirect[IndexDirectHold],IndexDirectBack,IndexDirectHold,IndexDirectForward,
+		//DirectBack,DirectHold,DirectForward
 		prtvalveStatus[valveKind].valveDirection = DirectForward;
 		prtvalveStatus[valveKind].valveCounts +=1;
 	}
@@ -361,12 +378,20 @@ void valveDirectBack(int16_t subT, int16_t superHeat,ValveKinds valveKind)
 //计算主电子膨胀阀
 void ValveCalc_calcValveMain(ValveKinds valveKind)
 {
+	int16_t workModel = iQUE_getWorkerModel();
 	int16_t superHeat,subT;
 	ValveSig_t sig;
+
+
 	//0.1 排气温度>100,
 	if (iQUE_getAirOutTemper() > AirOutTemperMax100)
 	{
-		sig.code = (iQUE_getAirOutTemper()- AirOutTemperMax100-10)/10;
+		sig.code = (iQUE_getAirOutTemper()- AirOutTemperMax100+10)/10;
+		if (workModel == SIG_MAKE_COLD)
+		{
+			//制冷时电子膨胀阀要往小开
+			sig.code = -sig.code;
+		}
 		sig.kindValue = ValveMainA;
 		sig.sig = valveRun;
 		ValveCalc_pushSig(&sig);
@@ -391,7 +416,7 @@ void ValveCalc_calcValveMain(ValveKinds valveKind)
 	//3.3上次电子膨胀阀开度减少
 	else
 	{
-		valveDirectHold(subT,superHeat,valveKind);
+		valveDirectBack(subT,superHeat,valveKind);
 	}
 	//4.连续增加或减少次数>=4，重置步数和次数
 	if (prtvalveStatus[valveKind].valveCounts >=4)
@@ -412,6 +437,10 @@ void ValveCalc_calcValveMain(ValveKinds valveKind)
 	//5.发送步数LastStep*ValveDirection, valveRun,
 	//步数*方向 区分正反转
 	sig.code = prtvalveStatus[valveKind].lastStep*(int16_t)(prtvalveStatus[valveKind].valveDirection - DirectHold);
+	if (workModel == SIG_MAKE_COLD)
+	{
+		sig.code = -sig.code;
+	}
 	sig.sig = valveRun;
 	sig.kindValue = valveKind;
 	ValveCalc_pushSig(&sig);
@@ -425,26 +454,6 @@ void ValveCalc_command5PushSig(int8_t data, uint16_t valveKind)
 	sig.kindValue = valveKind;
 
 	ValveCalc_pushSig(&sig);
-}
-
-
-void vTask_valveCalc(void)
-{	
-	//100ms * 10 * 120s
-	static uint16_t i=0;
-	if (ValveClac_getStartFlag() == STATE_ON)
-	{
-		i++;
-		if (i>=900)
-		{
-			ValveCalc_calcValveMain(ValveMainA);
-			ValveCalc_calcValveSub(ValveSubB);
-			i=0;
-		}
-
-	}else{
-		i=0;
-	}
 }
 
 
@@ -480,7 +489,8 @@ void ValveCalc_calcValveSub(ValveKinds valveKind)
 		ValveCalc_pushSig(&sig);
 		return;
 	}
-	if (iQUE_getEvirTemper() >= EnvirTemper5)
+	//增加如果排气-水温<10度，关阀
+	if (iQUE_getEvirTemper() >= EnvirTemper5 || value <= (iQUE_getUpperLimit() - 100))
 	{
 		if (getValveTotalStep(valveKind) != 0)
 		{
@@ -531,17 +541,78 @@ void ValveCalc_valveInit(void)
 	ValveCalc_pushSig(&valveSig);
 	//..初始开度
 	valveSig.sig = valveRun;
-	valveSig.code = 300;
+	valveSig.code = VALVE_INITRUN_STEP;
 	valveSig.kindValue = ValveMainA;
 	ValveCalc_pushSig(&valveSig);
-	//..补齐阀默认关闭
-	if (iQUE_getEvirTemper() >= EnvirTemper5)
-	{
-		valveSig.sig = valveRun;
-		valveSig.code = TabValveParams[ValveSubB][IndexInitStep];
-		valveSig.kindValue = ValveSubB;
-		ValveCalc_pushSig(&valveSig);
-	}
-	
+	//..补气阀默认关闭，上电时，应该不会有温度，不能根据环温设置初始开度
+}
 
+//制冷制热模式切换时，重新设置参数
+void ValveCalc_WorkerModelChangeParams(void)
+{
+	int16_t workModel = iQUE_getWorkerModel();
+	ValveSig_t valveSig;
+
+	switch(workModel)
+	{
+	case SIG_MAKE_COLD:
+		{
+			//1.制冷时电子膨胀阀最大步数120
+			ValveCalc_ChangeTabValveParams(VALVE_COLDMAX_STEP);
+			//2.主电子膨胀阀开度设置到30
+			valveSig.sig = valveRun ;
+			valveSig.code = VALVE_MIN_STEP - getValveTotalStep(ValveMainA);
+			valveSig.kindValue = ValveMainA;
+			ValveCalc_pushSig(&valveSig);
+			break;
+		}
+	case SIG_MAKE_HotWater:
+		{
+			//1.制冷时电子膨胀阀最大步数470
+			ValveCalc_ChangeTabValveParams(VALVE_MAX_STEP);
+			//2.主电子膨胀阀开度设置到100
+			valveSig.sig = valveRun;
+			valveSig.code = VALVE_INITRUN_STEP  - getValveTotalStep(ValveMainA);
+			valveSig.kindValue = ValveMainA;
+			ValveCalc_pushSig(&valveSig);
+			break;
+		}
+	default:break;
+	}
+}
+
+
+
+void vTask_valveCalc(void)
+{	
+	//100ms * 10 * 120s
+	static uint16_t i=0;
+	ValveSig_t sig;
+	if (ValveClac_getStartFlag() == STATE_ON)
+	{
+		i++;
+		if (i>=900)
+		{
+			ValveCalc_calcValveMain(ValveMainA);
+
+			if (iQUE_getWorkerModel() == SIG_MAKE_HotWater)
+			{
+				ValveCalc_calcValveSub(ValveSubB);
+			}
+			else{
+				//1. 如果补齐阀是打开的，则关闭，
+				if (getValveTotalStep(ValveSubB) != 0)
+				{
+					sig.code = 500;	//any value but 0
+					sig.kindValue = ValveSubB;
+					sig.sig = valveClose;
+					ValveCalc_pushSig(&sig);
+				}
+			}
+			i=0;
+		}
+
+	}else{
+		i=0;
+	}
 }

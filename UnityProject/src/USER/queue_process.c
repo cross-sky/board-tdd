@@ -14,6 +14,13 @@ CoreProcess_t coreProcess;
 //进入/退出状态 结束后必须清0
 uint32_t timeFlag=0;
 
+uint8_t vqueFunOn(void);
+ptrfuntion ptrWorkerModel = vqueFunOn;
+void setWorkerModelFun( ptrfuntion  newModelFun)
+{
+	ptrWorkerModel = newModelFun;
+}
+
 //!!!!!!!每个case 后面必须配一个break/return 否则会处理出错！！！！！！！！
 
 #define Time0s	0
@@ -110,10 +117,20 @@ int16_t iQUE_getInTemper(void)
 //获取蒸发温度
 int16_t iQUE_getEvaporateTemper(void)
 {
-	return coreProcess.coreParems.machineA.evaporateTemper;
+	uint16_t workModel = iQUE_getWorkerModel();
+	if (workModel == SIG_MAKE_HotWater)
+	{
+		//制热时蒸发温度，选择蒸发探头
+		return coreProcess.coreParems.machineA.evaporateTemper;
+	}
+	else if (workModel == SIG_MAKE_COLD)
+	{
+		//制冷时蒸发温度，选择进水探头
+		return coreProcess.coreParems.waterIn;
+	}
+	else
+		return 30;
 }
-
-
 
 //获取排气温度
 int16_t iQUE_getAirOutTemper(void)
@@ -133,8 +150,34 @@ int16_t iQUE_getWaterBankTemper(void)
 	return coreProcess.coreParems.waterBank;
 }
 
-//根据环温，水温确定合适的过热度
-int16_t iQUE_getSuperheat(void)
+int16_t iQUE_getWorkerModel(void)
+{
+	return coreProcess.coreParems.setWorkMode;
+}
+
+void iQUE_setWorkerModel(int16_t newstate)
+{
+	coreProcess.coreParems.setWorkMode = newstate;
+}
+
+int16_t iQUE_getColdModelSuperHeat(void)
+{
+	//排气-水温差来判断
+	int16_t data=0;
+	int16_t temp = iQUE_getAirOutTemper() - iQUE_getWaterBankTemper();
+	if (temp <= 400)
+	{
+		data = 50;
+	}else if(temp >= 700)
+	{
+		data = 20;
+	}else{
+		data = (int16_t)(temp*(-0.1)) + 90;
+	}
+	return data;
+}
+
+int16_t iQUE_getHotWaterModelSuperHeat(void)
 {
 	int16_t data=0;
 	int16_t envirT = iQUE_getEvirTemper();
@@ -147,7 +190,7 @@ int16_t iQUE_getSuperheat(void)
 		data = 20;
 	}else{
 		//-10时过热度2，0度时过热度3
-		data = envirT*0.1 + 30;
+		data = (int16_t)(envirT*0.1) + 30;
 	}
 
 	//水温>40度，过热度-1
@@ -156,6 +199,22 @@ int16_t iQUE_getSuperheat(void)
 		data -=10;
 	}
 	return data;
+}
+
+//根据环温，水温确定合适的过热度
+int16_t iQUE_getSuperheat(void)
+{
+	uint16_t workModel = iQUE_getWorkerModel();
+	int16_t value=0;
+	if (workModel == SIG_MAKE_HotWater)
+	{
+		value = iQUE_getHotWaterModelSuperHeat();
+	}
+	else if (workModel == SIG_MAKE_COLD)
+	{
+		value = iQUE_getColdModelSuperHeat();
+	}
+	return value;
 }
 
 void iQUE_ValveChanges(ValveKinds valveKind,uint16_t step)
@@ -329,6 +388,9 @@ uint8_t vqueFunOff(void)
 	case FUN_STATE_RUN:
 		{
 			//无动作 直接退出
+			//1.检查是否有模式切换，在关机状态下，电子膨胀阀队列应该执行玩了。
+			checkWorkModelIsChange();
+
 			vQueCheck3MinDelay();
 			return SIG_NULL;
 		}
@@ -396,7 +458,7 @@ uint8_t vqueFunOn(void)
 			//无动作 直接退出
 			//蒸发温度<设定值 进入除霜
 			if (coreProcess.coreParems.machineA.evaporateTemper <= coreProcess.coreParems.setDefrostInTemper
-				&& timeFlag>= coreProcess.coreParems.setDefrostCycleTimes)
+				&& timeFlag>= (coreProcess.coreParems.setDefrostCycleTimes >>1))
 			{
 				timeFlag=0;
 				xQUESigPush(SIG_DEFROST);
@@ -446,6 +508,105 @@ uint8_t vqueFunOn(void)
 	}
 }
 
+//制冷模式
+uint8_t vqueFunColdOn(void)
+{
+
+	switch(coreProcess.funState)
+	{
+	case FUN_STATE_INIT:
+		{
+
+			//无动作 直接退出
+			switch(timeFlag)
+			{
+			case Time3s:
+				{
+					vRelaySet(Relay03CyclePump, STATE_ON);
+					vRelaySet(Relay02Valve4way, STATE_ON);
+					IODECT_startCheckWaterOpen();
+					break;
+				}
+			case Time10s:
+				{
+					//2@@@@@@@@@@@检测水流闭合,无温度异常，高低压闭合....
+
+					vRelaySet(Relay09Motor, STATE_ON);
+					if (vQueCheck3MinDelay() == STATE_ON)
+					{
+						timeFlag = Time180s-1;
+					}
+					break;
+				}
+			case Time180s:
+				{
+					//开启压缩机
+					vRelaySet(Relay01Compressor,STATE_ON);
+					timeFlag=0;
+
+					ValveCalc_setStartFlag(STATE_ON);
+					return FUN_STATE_INIT;
+				}
+			default:break;
+			}
+
+			timeFlag++;
+			return SIG_NULL;
+		}
+	case FUN_STATE_RUN:
+		{
+			//无动作 直接退出
+			//蒸发温度<设定值 制冷模式没有除霜
+			/*if (coreProcess.coreParems.machineA.evaporateTemper <= coreProcess.coreParems.setDefrostInTemper
+				&& timeFlag>= coreProcess.coreParems.setDefrostCycleTimes>>1)
+			{
+				timeFlag=0;
+				xQUESigPush(SIG_DEFROST);
+				return SIG_NULL;
+			}*/
+			//水箱温度<设定温度 进入保温
+			if (coreProcess.coreParems.waterBank <= coreProcess.coreParems.setColdWaterT)
+			{
+				timeFlag=0;
+				xQUESigPush(SIG_COLDHOLD);
+				return SIG_NULL;
+			}
+			timeFlag++;
+			return SIG_NULL;
+		}
+	case FUN_STATE_EXIT:
+		{
+			//无动作 直接退出
+
+			switch(timeFlag)
+			{
+			case Time3s:
+				{
+					vRelaySet(Relay01Compressor,STATE_OFF);
+					IODECT_stopCheckWaterOpen();
+					break;
+				}
+			case Time10s:
+				{
+					vRelaySet(Relay02Valve4way, STATE_OFF);
+					vRelaySet(Relay09Motor, STATE_OFF);
+					vRelaySet(Relay03CyclePump, STATE_OFF);
+					timeFlag=0;
+					ValveCalc_setStartFlag(STATE_OFF);
+					return FUN_STATE_EXIT;
+				}
+			default:break;
+			}
+			timeFlag++;
+			return SIG_NULL;
+		}
+	default:
+		{
+			//无动作
+			return SIG_NULL;
+		}
+	}
+}
 
 uint8_t vqueFunNoErr(void)
 {
@@ -497,6 +658,8 @@ uint8_t vqueFunDefrost(void)
 					//vRelaySet(Relay09Motor, STATE_ON);
 
 					ValveCalc_valveInit();
+					//除霜开度要调到最小
+					ValveCalc_command5PushSig(-100, ValveMainA);
 					break;
 				}
 			case Time60s:
@@ -610,6 +773,41 @@ uint8_t vqueFunHold(void)
 	}
 }
 
+uint8_t vqueFunColdHold(void)
+{
+	switch(coreProcess.funState)
+	{
+	case FUN_STATE_INIT:
+		{
+			//无动作 直接退出
+			return FUN_STATE_INIT;
+		}
+	case FUN_STATE_RUN:
+		{
+			//T水箱<T设定-回差：进入加热
+			if (coreProcess.coreParems.waterBank >= (coreProcess.coreParems.setColdWaterT
+				+coreProcess.coreParems.setWaterCycleTemper))
+			{
+				xQUESigPush(SIG_COLDON);
+			}
+
+
+			vQueCheck3MinDelay();
+			return SIG_NULL;
+		}
+	case FUN_STATE_EXIT:
+		{
+			//无动作 直接退出
+			return FUN_STATE_EXIT;
+		}
+	default:
+		{
+			//无动作
+			return SIG_NULL;
+		}
+	}
+}
+
 uint8_t vqueFunLowT(void)
 {
 	switch(coreProcess.funState)
@@ -690,7 +888,7 @@ void vqueNormalEventProcess(void)
 				{
 				case SIG_ON:
 					{
-						vqueSetNewFuntion(vqueFunOn);
+						vqueSetNewFuntion(ptrWorkerModel);
 						break;
 					}
 				case SIG_DEFROST:
@@ -817,6 +1015,9 @@ void vQUEInit(void)
 
 	coreProcess.coreParems.setAirout_water = 20*10;
 
+	coreProcess.coreParems.setColdWaterT = 15*10;
+	coreProcess.coreParems.setWorkMode = SIG_MAKE_HotWater;
+
 	coreProcess.funExcuted=FUN_EXCUTED;
 	coreProcess.funState=FUN_STATE_RUN;
 	coreProcess.tempfun=vqueFunOff;
@@ -825,10 +1026,6 @@ void vQUEInit(void)
 
 	vqueSetMachineState(SIG_OFF);
 }
-
-
-
-
 
 
 //....................................................................
@@ -878,3 +1075,29 @@ void vQueSetCoreParams(Command2RequestDataStruct *srcData)
 }
 
 
+//only in off model then change work model
+void vQUE_changeWorkerModel(void)
+{
+	int16_t workModel = iQUE_getWorkerModel();
+	
+	if (workModel == SIG_MAKE_COLD)
+	{
+		setWorkerModelFun(vqueFunColdOn);
+	}
+	else if (workModel == SIG_MAKE_HotWater)
+	{
+		setWorkerModelFun(vqueFunOn);
+	}
+}
+
+void checkWorkModelIsChange(void)
+{
+	static uint16_t tvalue = SIG_MAKE_HotWater;
+	uint16_t workModel = iQUE_getWorkerModel();
+	if (workModel != tvalue)
+	{
+		tvalue = workModel;
+		ValveCalc_WorkerModelChangeParams();
+		vQUE_changeWorkerModel();
+	}
+}

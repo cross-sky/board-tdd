@@ -109,6 +109,7 @@ TEST(RTdataStruct, TestCommand5)
 	c5Data.data1Relay =data1Relay;
 	c5Data.data2ValveA = data2ValveA;
 	c5Data.data3ValveB = data3ValveB;
+	c5Data.workModel = SIG_MAKE_COLD;
 
 	ptrNode->length = 10;
 	ptrNode->buff=uartRxProcess.node[0].buff;
