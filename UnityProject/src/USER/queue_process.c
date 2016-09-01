@@ -118,18 +118,16 @@ int16_t iQUE_getInTemper(void)
 int16_t iQUE_getEvaporateTemper(void)
 {
 	uint16_t workModel = iQUE_getWorkerModel();
-	if (workModel == SIG_MAKE_HotWater)
-	{
-		//制热时蒸发温度，选择蒸发探头
-		return coreProcess.coreParems.machineA.evaporateTemper;
-	}
-	else if (workModel == SIG_MAKE_COLD)
+	if (workModel == SIG_MAKE_COLD)
 	{
 		//制冷时蒸发温度，选择进水探头
 		return coreProcess.coreParems.waterIn;
 	}
 	else
-		return 30;
+	{
+		//制热时蒸发温度，选择蒸发探头
+		return coreProcess.coreParems.machineA.evaporateTemper;
+	}
 }
 
 //获取排气温度
@@ -657,7 +655,7 @@ uint8_t vqueFunDefrost(void)
 					//2@@@@@@@@@@@检测水流闭合 待写.....
 					//vRelaySet(Relay09Motor, STATE_ON);
 
-					ValveCalc_valveInit();
+					//ValveCalc_defrostValveSet();
 					//除霜开度要调到最小
 					ValveCalc_command5PushSig(-100, ValveMainA);
 					break;
@@ -674,11 +672,7 @@ uint8_t vqueFunDefrost(void)
 					timeFlag=0;
 					return FUN_STATE_INIT;
 				}
-			/*case Time360S:
-				{
-					timeFlag=0;
-					return FUN_STATE_INIT;
-				}*/
+
 			default:break;
 			}
 
@@ -717,6 +711,8 @@ uint8_t vqueFunDefrost(void)
 					vRelaySet(Relay01Compressor,STATE_OFF);
 					vRelaySet(Relay03CyclePump, STATE_OFF);
 					IODECT_stopCheckWaterOpen();
+					ValveCalc_valveClose(ValveMainA);
+					ValveCalc_stepsSetTo(ValveMainA, VALVE_INITRUN_STEP);
 					break;
 				}
 			case Time10s:

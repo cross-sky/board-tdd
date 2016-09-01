@@ -457,16 +457,14 @@ void ValveCalc_command5PushSig(int8_t data, uint16_t valveKind)
 }
 
 
-void ValveCalc_valveClose(void)
+void ValveCalc_valveClose(ValveKinds valveKind)
 {
 	//关机时关闭
 	ValveSig_t valveSig;
 	//..找到0位置
 	valveSig.sig = valveClose;
-	valveSig.code = 0;
-	valveSig.kindValue = ValveMainA;
-	ValveCalc_pushSig(&valveSig);
-	valveSig.kindValue = ValveSubB;
+	valveSig.code = 100;
+	valveSig.kindValue = valveKind;
 	ValveCalc_pushSig(&valveSig);
 }
 
@@ -547,11 +545,26 @@ void ValveCalc_valveInit(void)
 	//..补气阀默认关闭，上电时，应该不会有温度，不能根据环温设置初始开度
 }
 
+void ValveCalc_stepsSetTo(ValveKinds valveKind, int16_t steps)
+{
+	ValveSig_t valveSig;
+	valveSig.sig = valveRun ;
+	valveSig.code = steps - getValveTotalStep(ValveMainA);
+	valveSig.kindValue = valveKind;
+	ValveCalc_pushSig(&valveSig);
+}
+
+//除霜时进行一次调零
+void ValveCalc_defrostValveSet(void)
+{
+	ValveCalc_valveInit();
+	ValveCalc_stepsSetTo(ValveMainA, VALVE_MIN_STEP);
+}
+
 //制冷制热模式切换时，重新设置参数
 void ValveCalc_WorkerModelChangeParams(void)
 {
 	int16_t workModel = iQUE_getWorkerModel();
-	ValveSig_t valveSig;
 
 	switch(workModel)
 	{
@@ -560,10 +573,11 @@ void ValveCalc_WorkerModelChangeParams(void)
 			//1.制冷时电子膨胀阀最大步数120
 			ValveCalc_ChangeTabValveParams(VALVE_COLDMAX_STEP);
 			//2.主电子膨胀阀开度设置到30
-			valveSig.sig = valveRun ;
+			ValveCalc_stepsSetTo(ValveMainA, VALVE_MIN_STEP);
+			/*valveSig.sig = valveRun ;
 			valveSig.code = VALVE_MIN_STEP - getValveTotalStep(ValveMainA);
 			valveSig.kindValue = ValveMainA;
-			ValveCalc_pushSig(&valveSig);
+			ValveCalc_pushSig(&valveSig);*/
 			break;
 		}
 	case SIG_MAKE_HotWater:
@@ -571,10 +585,11 @@ void ValveCalc_WorkerModelChangeParams(void)
 			//1.制冷时电子膨胀阀最大步数470
 			ValveCalc_ChangeTabValveParams(VALVE_MAX_STEP);
 			//2.主电子膨胀阀开度设置到100
-			valveSig.sig = valveRun;
+			/*valveSig.sig = valveRun;
 			valveSig.code = VALVE_INITRUN_STEP  - getValveTotalStep(ValveMainA);
 			valveSig.kindValue = ValveMainA;
-			ValveCalc_pushSig(&valveSig);
+			ValveCalc_pushSig(&valveSig);*/
+			ValveCalc_stepsSetTo(ValveMainA, VALVE_INITRUN_STEP);
 			break;
 		}
 	default:break;
