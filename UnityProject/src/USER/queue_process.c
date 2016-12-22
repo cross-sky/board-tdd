@@ -27,8 +27,8 @@ void setWorkerModelFun( ptrfuntion  newModelFun)
 #define Time3s	20*3
 #define Time10s 20*10
 #define Time60s	20*60
-#define Time180s	20*180
-#define Time360S	20*360
+#define Time180s	20*90
+//#define Time360S	20*360
 
 CoreProcess_t* xQue_getCoreData(void)
 {
@@ -405,6 +405,17 @@ uint8_t vqueFunOff(void)
 	}
 }
 
+uint8_t checkIsDefrost(uint32_t timeFlag)
+{
+	return coreProcess.coreParems.machineA.evaporateTemper <= coreProcess.coreParems.setDefrostInTemper
+		&& timeFlag>= (coreProcess.coreParems.setDefrostCycleTimes >>1);
+}
+
+uint8_t checkIsRunMax3Times(uint32_t timeFlag)
+{
+	return timeFlag>= (coreProcess.coreParems.setDefrostCycleTimes <<1);
+}
+
 uint8_t vqueFunOn(void)
 {
 	
@@ -455,8 +466,7 @@ uint8_t vqueFunOn(void)
 		{
 			//无动作 直接退出
 			//蒸发温度<设定值 进入除霜
-			if (coreProcess.coreParems.machineA.evaporateTemper <= coreProcess.coreParems.setDefrostInTemper
-				&& timeFlag>= (coreProcess.coreParems.setDefrostCycleTimes >>1))
+			if (checkIsDefrost(timeFlag))
 			{
 				timeFlag=0;
 				xQUESigPush(SIG_DEFROST);
@@ -657,7 +667,7 @@ uint8_t vqueFunDefrost(void)
 
 					//ValveCalc_defrostValveSet();
 					//除霜开度要调到最小
-					ValveCalc_command5PushSig(-100, ValveMainA);
+					ValveCalc_command5PushSig(-500, ValveMainA);
 					break;
 				}
 			case Time60s:
@@ -840,13 +850,20 @@ void vqueNormalEventProcess(void)
 
 	if (tSig != SIG_NULL)
 	{
+		tmstate = vqueGetMachineState();
+
+		//tsig 与当前运行状态相同，则退出
+		if (tSig == tmstate)
+		{
+			return;
+		}
+
 		//清除从退出运行到run标志(状态转换完成标志)
 		coreProcess.funExcuted = 0;
 		//外部/内部事件进行强制转换
 		coreProcess.funState=FUN_STATE_EXIT;
 
-
-		tmstate = vqueGetMachineState();
+		
 		vqueSetMachineState((SigState)tSig);
 
 		timeFlag=0;

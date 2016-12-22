@@ -10,8 +10,8 @@ TPC_TASK TaskComps[]=
 	{0, 0, 10,  10, TaskUart1PopProcess},	//50ms每次
 	{0, 0, 2,  2, Task1RegularSimpling},	//10ms每次
 	{0, 0, 20,  20, Task2InputProcess},	//100ms每次
-	{0, 0, 6,  6, vTask_valveProcess},	//30ms每次
-	{0, 0, 10,  10, vTaskQUEProcess},		//40ms每次
+	{0, 0, 7,  7, vTask_valveProcess},	//30ms每次
+	{0, 0, 10,  10, vTaskQUEProcess},		//5*10ms每次
 	{0, 0, 20,  20, vTask_valveCalc},	//50ms每次
 };
 

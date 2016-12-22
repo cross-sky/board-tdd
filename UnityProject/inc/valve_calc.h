@@ -68,7 +68,7 @@ void ValveCalc_checkProcess(ValveKinds valveKind);
 void ValveCalc_valveRun(ValveKinds valveKind);
 void ValveCalc_calcValveMain(ValveKinds valveKind);
 
-void ValveCalc_command5PushSig(int8_t data, uint16_t valveKind);
+void ValveCalc_command5PushSig(int16_t data, uint16_t valveKind);
 
 void vTask_valveProcess(void);
 void ValveCalc_setStartFlag(uint8_t state);

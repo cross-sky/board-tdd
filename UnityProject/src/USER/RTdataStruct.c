@@ -181,21 +181,22 @@ uint16_t RT_command4SendReturn(int8_t *txAddr)
 //	j += sprintf((char *)(txAddr+j), " wOut %d,",returnData.waterOut);
 	j += sprintf((char *)(txAddr+j), " wBank %d,",returnData.waterBank);
 	j += sprintf((char *)(txAddr+j), " eviT %d,",returnData.evironT);
-	j += sprintf((char *)(txAddr+j), " innerT %d,",returnData.innerTemper);
+	j += sprintf((char *)(txAddr+j), " inT %d,",returnData.innerTemper);
 
-	j += sprintf((char *)(txAddr+j), " airevaT %d,",returnData.machineA.evaporateTemper);
-	j += sprintf((char *)(txAddr+j), " airinT %d,",returnData.machineA.inTemper);
-	j += sprintf((char *)(txAddr+j), " airOutT %d,",returnData.machineA.outTemper);
+	j += sprintf((char *)(txAddr+j), " aevaT %d,",returnData.machineA.evaporateTemper);
+	j += sprintf((char *)(txAddr+j), " ainT %d,",returnData.machineA.inTemper);
+	j += sprintf((char *)(txAddr+j), " aOutT %d,",returnData.machineA.outTemper);
 
+	j += sprintf((char *)(txAddr+j), " supH %d,",iQUE_getSuperheat());
 	j += sprintf((char *)(txAddr+j), " curI %d,",returnData.machineA.current);
 
-	j += sprintf((char *)(txAddr+j), " errType %d,",returnData.errType);
-	j += sprintf((char *)(txAddr+j), " cdIostate %x,",returnData.cd4051DectState);
+	j += sprintf((char *)(txAddr+j), " err %d,",returnData.errType);
+	j += sprintf((char *)(txAddr+j), " cdIo %x,",returnData.cd4051DectState);
 
-	j += sprintf((char *)(txAddr+j), " mstate %d",returnData.runState.machineState);//..........
+	j += sprintf((char *)(txAddr+j), " msta %d",returnData.runState.machineState);//..........
 	j += sprintf((char *)(txAddr+j), " relays %d",returnData.relaysValue);//..........	
-	j += sprintf((char *)(txAddr+j), " valMAstep %d,",returnData.machineA.valveMainStep);
-	j += sprintf((char *)(txAddr+j), " valSBstep %d\r\n",returnData.machineA.valveSubStep);
+	j += sprintf((char *)(txAddr+j), " Astep %d,",returnData.machineA.valveMainStep);
+	j += sprintf((char *)(txAddr+j), " Bstep %d\r\n",returnData.machineA.valveSubStep);
 
 	i++;
 	return j;

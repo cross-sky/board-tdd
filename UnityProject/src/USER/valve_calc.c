@@ -1,6 +1,6 @@
 #include "cominc.h"
 
-#define VALVE_STEPS_ONECE	32	//默认每次运行最大步数
+#define VALVE_STEPS_ONECE	16	//默认每次运行最大步数
 
 uint8_t valveCalcStartFlag= STATE_OFF;
 
@@ -14,7 +14,7 @@ typedef enum {
 
 int16_t TabValveParamsHeat[ValveKindsMax][ValveEnumMax]={
 	{VALVE_INIT_STEP,VALVE_CLOSE_STEP,VALVE_MIN_STEP,VALVE_MAX_STEP},
-	{VALVE_INIT_STEP,VALVE_CLOSE_STEP,VALVE_MIN_STEP,VALVE_MAX_STEP-200}
+	{VALVE_INIT_STEP,VALVE_CLOSE_STEP,VALVE_MIN_STEP,VALVE_MAX_STEP}
 };
 
 uint16_t TabValveDirect[IndexDirectMax]={
@@ -96,7 +96,7 @@ int16_t getValveStep(ValveKinds valveKind)
 
 int16_t getLowerLimit(void)
 {
-	return iQUE_getUpperLimit()-40;
+	return iQUE_getUpperLimit()-80;
 }
 
 int16_t getValveTotalStep(uint16_t valveKind)
@@ -446,7 +446,7 @@ void ValveCalc_calcValveMain(ValveKinds valveKind)
 	ValveCalc_pushSig(&sig);
 }
 
-void ValveCalc_command5PushSig(int8_t data, uint16_t valveKind)
+void ValveCalc_command5PushSig(int16_t data, uint16_t valveKind)
 {
 	ValveSig_t sig;
 	sig.code = data;
@@ -487,8 +487,10 @@ void ValveCalc_calcValveSub(ValveKinds valveKind)
 		ValveCalc_pushSig(&sig);
 		return;
 	}
-	//增加如果排气-水温<10度，关阀
-	if (iQUE_getEvirTemper() >= EnvirTemper5 || value <= (iQUE_getUpperLimit() - 100))
+
+/*
+	//环温>=5度，关阀；增加如果排气-水温<10度--暂时不能  || value <= (iQUE_getUpperLimit() - 100)
+	if (iQUE_getEvirTemper() >= EnvirTemper5 )
 	{
 		if (getValveTotalStep(valveKind) != 0)
 		{
@@ -498,8 +500,24 @@ void ValveCalc_calcValveSub(ValveKinds valveKind)
 			ValveCalc_pushSig(&sig);
 		}
 		return;
-	}
+	}else
+	{
+		//补气电子膨胀阀初始开度设置
+		//1.查询到补气开度为0时，重新设置初始开度
+		if (getValveTotalStep(ValveSubB) == 0)
+		{
+			sig.code = 300;
+			sig.kindValue = ValveSubB;
+			sig.sig = valveRun;
+			ValveCalc_pushSig(&sig);
+			return;
+		}
+	}*/
 
+	
+	//1. >20度，阀开大
+	//2. <16度，阀开小
+	//3. 16-20之间，阀开度不变
 	if (value > iQUE_getUpperLimit()  )
 	{
 		//run (value- upperLimit)/20 steps, max run 4 steps
@@ -537,7 +555,7 @@ void ValveCalc_valveInit(void)
 	ValveCalc_pushSig(&valveSig);
 	valveSig.kindValue = ValveSubB;
 	ValveCalc_pushSig(&valveSig);
-	//..初始开度
+	//主膨胀阀初始开度
 	valveSig.sig = valveRun;
 	valveSig.code = VALVE_INITRUN_STEP;
 	valveSig.kindValue = ValveMainA;

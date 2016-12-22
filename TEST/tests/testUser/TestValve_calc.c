@@ -2,7 +2,7 @@
 #include "unity.h"
 #include "unity_fixture.h"
 
-#define VALVE_STEPSInit	32	//默认每次运行最大步数
+#define VALVE_STEPSInit	16	//默认每次运行最大步数
 
 static ValveStatus_t testValveData[ValveKindsMax]={
 	{statusDone,0,0,VALVE_STEPSInit,DirectHold,0},
@@ -264,6 +264,8 @@ TEST(ValveCalc, TestValveCalc_calcValveSub)
 	int16_t airout;
 	int16_t envir;
 
+	setInitTestValveData(1);
+	
 	//airout>100
 	water = 30;
 	airout = 105;
@@ -287,10 +289,10 @@ TEST(ValveCalc, TestValveCalc_calcValveSub)
 	{
 		ValveCalc_checkProcess(ValveSubB);
 	}
+	//test envir>5,also open
+	//TEST_ASSERT_EQUAL(0,testValveData[ValveSubB].totalSteps);
 	
-	TEST_ASSERT_EQUAL(0,testValveData[ValveSubB].totalSteps);
-	
-
+	testValveData[1].totalSteps = 300;
 	//airout<100 envir<5 airout-water=26
 	water = 30;
 	airout = 56;
@@ -309,14 +311,14 @@ TEST(ValveCalc, TestValveCalc_calcValveSub)
 	ValveCalc_popSig(&tsig);
 	TEST_ASSERT_EQUAL(4,tsig.code);
 
-	//airout<100 envir<5 airout-water=12
+	//airout<100 envir<5 airout-water=10
 	water = 30;
-	airout = 42;
+	airout = 40;
 	envir = 4;
 	setQueDataWaterAiroutEviTemper(water, airout, envir);
 	ValveCalc_calcValveSub(ValveSubB);
 	ValveCalc_popSig(&tsig);
-	TEST_ASSERT_EQUAL((airout-water - 16)/2,tsig.code);
+	TEST_ASSERT_EQUAL((airout-water - 12)/2,tsig.code);
 
 	//airout<100 envir<5 airout-water=6
 	water = 30;
@@ -325,7 +327,7 @@ TEST(ValveCalc, TestValveCalc_calcValveSub)
 	setQueDataWaterAiroutEviTemper(water, airout, envir);
 	ValveCalc_calcValveSub(ValveSubB);
 	//ValveCalc_popSig(&tsig);
-	TEST_ASSERT_EQUAL(FALSE,ValveCalc_popSig(&tsig));
+	TEST_ASSERT_EQUAL(TRUE,ValveCalc_popSig(&tsig));
 
 	//airout<100 envir<5 airout-water=18
 	water = 30;
